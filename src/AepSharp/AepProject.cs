@@ -39,12 +39,24 @@ public class AepProject
         var nhedData = nhedBlock.GetBytes();
         project.Depth = (BitsPerChannel)nhedData[15];
 
-        // Parse root folder — stubbed for now, will be implemented in Task 5
+        // Parse root folder
         var rootFolderList = root.SublistFind("Fold");
         if (rootFolderList == null)
             throw new InvalidDataException("Missing root Fold list in project");
-        project.RootFolder = new AepItem { Name = "root", Id = 0, ItemType = ItemType.Folder };
-        project.Items[0] = project.RootFolder;
+        project.RootFolder = AepItem.Parse(rootFolderList, project, isRoot: true);
+
+        // Layers without explicit names inherit from their source item
+        foreach (var item in project.Items.Values)
+        {
+            if (item.ItemType == ItemType.Composition)
+            {
+                foreach (var layer in item.CompositionLayers)
+                {
+                    if (string.IsNullOrEmpty(layer.Name) && project.Items.TryGetValue(layer.SourceId, out var source))
+                        layer.Name = source.Name;
+                }
+            }
+        }
 
         return project;
     }
