@@ -125,12 +125,13 @@ public class AepItem
                 item.Width = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(140));
                 item.Height = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(142));
 
-                // Parse layers — stubbed, will be implemented in Task 6
+                // Parse layers
                 var layerIndex = 0;
                 foreach (var layerList in itemHead.SublistFilter("Layr"))
                 {
                     layerIndex++;
-                    var layer = new AepLayer { Index = (uint)layerIndex };
+                    var layer = AepLayer.Parse(layerList, project);
+                    layer.Index = (uint)layerIndex;
                     item.CompositionLayers.Add(layer);
                 }
                 break;

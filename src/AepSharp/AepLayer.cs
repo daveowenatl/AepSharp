@@ -1,3 +1,6 @@
+using System.Buffers.Binary;
+using AepSharp.Rifx;
+
 namespace AepSharp;
 
 public class AepLayer
@@ -22,4 +25,47 @@ public class AepLayer
     public bool VideoEnabled { get; internal set; }
     public List<AepProperty> Effects { get; internal set; } = new();
     public AepProperty? Text { get; internal set; }
+
+    internal static AepLayer Parse(RifxList layerHead, AepProject project)
+    {
+        var layer = new AepLayer();
+
+        // ldta block — quality at offset 4, bit flags at offset 37-39, source ID at offset 40
+        var ldtaBlock = layerHead.FindByType("ldta");
+        if (ldtaBlock == null)
+            throw new InvalidDataException("Missing ldta block in layer");
+        var ldta = ldtaBlock.GetBytes();
+
+        layer.Quality = (LayerQuality)BinaryPrimitives.ReadUInt16BigEndian(ldta.AsSpan(4));
+        layer.SourceId = BinaryPrimitives.ReadUInt32BigEndian(ldta.AsSpan(40));
+
+        // Bit flags from bytes at offsets 37, 38, 39
+        byte bits0 = ldta[37];
+        byte bits1 = ldta[38];
+        byte bits2 = ldta[39];
+
+        layer.SamplingMode = (LayerSamplingMode)((bits0 & (1 << 6)) >> 6);
+        layer.FrameBlendMode = (LayerFrameBlendMode)((bits0 & (1 << 2)) >> 2);
+        layer.GuideEnabled = ((bits0 & (1 << 1)) >> 1) == 1;
+        layer.SoloEnabled = ((bits1 & (1 << 3)) >> 3) == 1;
+        layer.ThreeDEnabled = ((bits1 & (1 << 2)) >> 2) == 1;
+        layer.AdjustmentLayerEnabled = ((bits1 & (1 << 1)) >> 1) == 1;
+        layer.CollapseTransformEnabled = ((bits2 & (1 << 7)) >> 7) == 1;
+        layer.ShyEnabled = ((bits2 & (1 << 6)) >> 6) == 1;
+        layer.LockEnabled = ((bits2 & (1 << 5)) >> 5) == 1;
+        layer.FrameBlendEnabled = ((bits2 & (1 << 4)) >> 4) == 1;
+        layer.MotionBlurEnabled = ((bits2 & (1 << 3)) >> 3) == 1;
+        layer.EffectsEnabled = ((bits2 & (1 << 2)) >> 2) == 1;
+        layer.AudioEnabled = ((bits2 & (1 << 1)) >> 1) == 1;
+        layer.VideoEnabled = (bits2 & 1) == 1;
+
+        // Layer name
+        var nameBlock = layerHead.FindByType("Utf8");
+        if (nameBlock != null)
+            layer.Name = nameBlock.ToAsciiString();
+
+        // Effects and text will be parsed in Task 7
+
+        return layer;
+    }
 }
