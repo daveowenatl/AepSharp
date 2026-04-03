@@ -54,88 +54,88 @@ public class AepItem
         switch (item.ItemType)
         {
             case ItemType.Folder:
-            {
-                var childLists = new List<RifxList>();
-                childLists.AddRange(itemHead.SublistFilter("Item"));
-                var sfdr = itemHead.SublistMerge("Sfdr");
-                childLists.AddRange(sfdr.SublistFilter("Item"));
-                foreach (var childList in childLists)
                 {
-                    var child = Parse(childList, project);
-                    item.FolderContents.Add(child);
-                }
-                break;
-            }
-            case ItemType.Footage:
-            {
-                var pinList = itemHead.SublistFind("Pin ");
-                if (pinList == null)
-                    throw new InvalidDataException("Missing Pin list in footage item");
-
-                var sspcBlock = pinList.FindByType("sspc");
-                if (sspcBlock == null)
-                    throw new InvalidDataException("Missing sspc block in footage item");
-                var sspc = sspcBlock.GetBytes();
-                item.Width = (ushort)BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(30));
-                item.Height = (ushort)BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(34));
-                var secDividend = BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(38));
-                var secDivisor = BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(42));
-                item.DurationSeconds = (double)secDividend / secDivisor;
-                var fpsWhole = BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(56));
-                var fpsFrac = BinaryPrimitives.ReadUInt16BigEndian(sspc.AsSpan(60));
-                item.Framerate = fpsWhole + ((double)fpsFrac / (1 << 16));
-
-                var optiBlock = pinList.FindByType("opti");
-                if (optiBlock != null)
-                {
-                    var optiData = optiBlock.GetBytes();
-                    item.FootageType = (FootageType)BinaryPrimitives.ReadUInt16BigEndian(optiData.AsSpan(4));
-                    switch (item.FootageType)
+                    var childLists = new List<RifxList>();
+                    childLists.AddRange(itemHead.SublistFilter("Item"));
+                    var sfdr = itemHead.SublistMerge("Sfdr");
+                    childLists.AddRange(sfdr.SublistFilter("Item"));
+                    foreach (var childList in childLists)
                     {
-                        case FootageType.Solid:
+                        var child = Parse(childList, project);
+                        item.FolderContents.Add(child);
+                    }
+                    break;
+                }
+            case ItemType.Footage:
+                {
+                    var pinList = itemHead.SublistFind("Pin ");
+                    if (pinList == null)
+                        throw new InvalidDataException("Missing Pin list in footage item");
+
+                    var sspcBlock = pinList.FindByType("sspc");
+                    if (sspcBlock == null)
+                        throw new InvalidDataException("Missing sspc block in footage item");
+                    var sspc = sspcBlock.GetBytes();
+                    item.Width = (ushort)BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(30));
+                    item.Height = (ushort)BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(34));
+                    var secDividend = BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(38));
+                    var secDivisor = BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(42));
+                    item.DurationSeconds = (double)secDividend / secDivisor;
+                    var fpsWhole = BinaryPrimitives.ReadUInt32BigEndian(sspc.AsSpan(56));
+                    var fpsFrac = BinaryPrimitives.ReadUInt16BigEndian(sspc.AsSpan(60));
+                    item.Framerate = fpsWhole + ((double)fpsFrac / (1 << 16));
+
+                    var optiBlock = pinList.FindByType("opti");
+                    if (optiBlock != null)
+                    {
+                        var optiData = optiBlock.GetBytes();
+                        item.FootageType = (FootageType)BinaryPrimitives.ReadUInt16BigEndian(optiData.AsSpan(4));
+                        switch (item.FootageType)
                         {
-                            var end = Math.Min(255, optiData.Length);
-                            var nameBytes = optiData[26..end];
-                            item.Name = ExtractNullPaddedString(nameBytes);
-                            break;
-                        }
-                        case FootageType.Placeholder:
-                        {
-                            var nameBytes = optiData[10..];
-                            item.Name = ExtractNullPaddedString(nameBytes);
-                            break;
+                            case FootageType.Solid:
+                                {
+                                    var end = Math.Min(255, optiData.Length);
+                                    var nameBytes = optiData[26..end];
+                                    item.Name = ExtractNullPaddedString(nameBytes);
+                                    break;
+                                }
+                            case FootageType.Placeholder:
+                                {
+                                    var nameBytes = optiData[10..];
+                                    item.Name = ExtractNullPaddedString(nameBytes);
+                                    break;
+                                }
                         }
                     }
+                    break;
                 }
-                break;
-            }
             case ItemType.Composition:
-            {
-                var cdtaBlock = itemHead.FindByType("cdta");
-                if (cdtaBlock == null)
-                    throw new InvalidDataException("Missing cdta block in composition item");
-                var cdta = cdtaBlock.GetBytes();
-                var fpsDivisor = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(4));
-                var fpsDividend = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(8));
-                item.Framerate = (double)fpsDividend / fpsDivisor;
-                var secDividend = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(44));
-                var secDivisor = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(48));
-                item.DurationSeconds = (double)secDividend / secDivisor;
-                item.BackgroundColor = new[] { cdta[52], cdta[53], cdta[54] };
-                item.Width = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(140));
-                item.Height = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(142));
-
-                // Parse layers
-                var layerIndex = 0;
-                foreach (var layerList in itemHead.SublistFilter("Layr"))
                 {
-                    layerIndex++;
-                    var layer = AepLayer.Parse(layerList, project);
-                    layer.Index = (uint)layerIndex;
-                    item.CompositionLayers.Add(layer);
+                    var cdtaBlock = itemHead.FindByType("cdta");
+                    if (cdtaBlock == null)
+                        throw new InvalidDataException("Missing cdta block in composition item");
+                    var cdta = cdtaBlock.GetBytes();
+                    var fpsDivisor = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(4));
+                    var fpsDividend = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(8));
+                    item.Framerate = (double)fpsDividend / fpsDivisor;
+                    var secDividend = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(44));
+                    var secDivisor = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(48));
+                    item.DurationSeconds = (double)secDividend / secDivisor;
+                    item.BackgroundColor = new[] { cdta[52], cdta[53], cdta[54] };
+                    item.Width = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(140));
+                    item.Height = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(142));
+
+                    // Parse layers
+                    var layerIndex = 0;
+                    foreach (var layerList in itemHead.SublistFilter("Layr"))
+                    {
+                        layerIndex++;
+                        var layer = AepLayer.Parse(layerList, project);
+                        layer.Index = (uint)layerIndex;
+                        item.CompositionLayers.Add(layer);
+                    }
+                    break;
                 }
-                break;
-            }
         }
 
         project.Items[item.Id] = item;

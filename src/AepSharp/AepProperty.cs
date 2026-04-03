@@ -89,31 +89,31 @@ public class AepProperty
                 switch (block.Type)
                 {
                     case "pdnm":
-                    {
-                        var strContent = block.ToAsciiString();
-                        if (prop.PropertyType == PropertyType.Select)
                         {
-                            prop.SelectOptions = new List<string>(strContent.Split('|'));
+                            var strContent = block.ToAsciiString();
+                            if (prop.PropertyType == PropertyType.Select)
+                            {
+                                prop.SelectOptions = new List<string>(strContent.Split('|'));
+                            }
+                            else if (!string.IsNullOrEmpty(strContent))
+                            {
+                                prop.Name = strContent;
+                            }
+                            break;
                         }
-                        else if (!string.IsNullOrEmpty(strContent))
-                        {
-                            prop.Name = strContent;
-                        }
-                        break;
-                    }
                     case "pard":
-                    {
-                        var data = block.GetBytes();
-                        var typeValue = BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan(14));
-                        prop.PropertyType = typeValue == 0x0a
-                            ? PropertyType.OneD
-                            : (PropertyType)typeValue;
+                        {
+                            var data = block.GetBytes();
+                            var typeValue = BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan(14));
+                            prop.PropertyType = typeValue == 0x0a
+                                ? PropertyType.OneD
+                                : (PropertyType)typeValue;
 
-                        var pardName = Encoding.UTF8.GetString(data, 16, 32).TrimEnd('\0');
-                        if (!string.IsNullOrEmpty(pardName))
-                            prop.Name = pardName;
-                        break;
-                    }
+                            var pardName = Encoding.UTF8.GetString(data, 16, 32).TrimEnd('\0');
+                            if (!string.IsNullOrEmpty(pardName))
+                                prop.Name = pardName;
+                            break;
+                        }
                 }
             }
         }
