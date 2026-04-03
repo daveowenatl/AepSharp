@@ -64,7 +64,21 @@ public class AepLayer
         if (nameBlock != null)
             layer.Name = nameBlock.ToAsciiString();
 
-        // Effects and text will be parsed in Task 7
+        // Parse properties via tdgp groups
+        var (rootTDGP, _) = AepProperty.IndexedGroupToMap(layerHead.SublistMerge("tdgp"));
+
+        // Effects
+        if (rootTDGP.TryGetValue("ADBE Effect Parade", out var effectsTDGP))
+        {
+            var effectsProp = AepProperty.ParseFromList(effectsTDGP, "ADBE Effect Parade");
+            layer.Effects = effectsProp.Properties;
+        }
+
+        // Text
+        if (rootTDGP.TryGetValue("ADBE Text Properties", out var textTDGP))
+        {
+            layer.Text = AepProperty.ParseFromList(textTDGP, "ADBE Text Properties");
+        }
 
         return layer;
     }
