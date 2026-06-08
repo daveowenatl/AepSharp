@@ -9,6 +9,16 @@ internal class RifxBlock
     public uint Size { get; set; }
     public object Data { get; set; } = Array.Empty<byte>();
 
+    /// <summary>Absolute byte offset of this block's 4-byte type tag within the stream.</summary>
+    public long Offset { get; set; }
+
+    /// <summary>
+    /// True when the declared size exceeded the bytes remaining in the enclosing list and the
+    /// reader fell back to capturing the remainder as an anonymous ("ANON") blob. A reliable
+    /// signal that the file is truncated or its structure has drifted from what we expect.
+    /// </summary>
+    public bool IsAnomalous { get; set; }
+
     public byte[] GetBytes() => (byte[])Data;
 
     public string ToAsciiString()

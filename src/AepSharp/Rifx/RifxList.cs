@@ -5,6 +5,9 @@ internal class RifxList
     public string Identifier { get; set; } = "";
     public List<RifxBlock> Blocks { get; set; } = new();
 
+    /// <summary>Absolute byte offset of this list's 4-byte identifier within the stream.</summary>
+    public long Offset { get; set; }
+
     public RifxBlock? FindByType(string type)
     {
         return Blocks.FirstOrDefault(b => b.Type == type);

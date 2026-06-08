@@ -1,0 +1,141 @@
+﻿{
+  ExpressionEngine: javascript-1.0,
+  RootFolder: {
+    Name: root,
+    FolderContents: [
+      {
+        Name: Folder 01,
+        Id: 46,
+        FolderContents: [
+          {
+            Name: Comp 01,
+            Id: 48,
+            ItemType: Composition,
+            Width: 351,
+            Height: 856,
+            Framerate: 21.0,
+            DurationSeconds: 31.0,
+            BackgroundColor: D0tS,
+            CompositionLayers: [
+              {
+                Index: 1,
+                Name: Null 1,
+                SourceId: 78,
+                Quality: Best,
+                GuideEnabled: false,
+                SoloEnabled: false,
+                ThreeDEnabled: false,
+                AdjustmentLayerEnabled: false,
+                CollapseTransformEnabled: false,
+                ShyEnabled: false,
+                LockEnabled: false,
+                FrameBlendEnabled: false,
+                MotionBlurEnabled: false,
+                EffectsEnabled: true,
+                AudioEnabled: true,
+                VideoEnabled: true
+              },
+              {
+                Index: 2,
+                Name: Shape Layer 1,
+                Quality: Best,
+                GuideEnabled: false,
+                SoloEnabled: false,
+                ThreeDEnabled: false,
+                AdjustmentLayerEnabled: false,
+                CollapseTransformEnabled: true,
+                ShyEnabled: false,
+                LockEnabled: false,
+                FrameBlendEnabled: false,
+                MotionBlurEnabled: false,
+                EffectsEnabled: true,
+                AudioEnabled: true,
+                VideoEnabled: true
+              }
+            ]
+          }
+        ],
+        BackgroundColor: AAAA
+      },
+      {
+        Name: Folder 02,
+        Id: 47,
+        FolderContents: [
+          {
+            Name: Comp 02,
+            Id: 59,
+            ItemType: Composition,
+            Width: 452,
+            Height: 639,
+            Framerate: 29.97,
+            DurationSeconds: 71.338004671338,
+            BackgroundColor: kc5V
+          }
+        ],
+        BackgroundColor: AAAA
+      },
+      {
+        Name: Footage,
+        Id: 70,
+        FolderContents: [
+          {
+            Name: Blue Solid,
+            Id: 74,
+            ItemType: Footage,
+            Width: 1920,
+            Height: 1080,
+            FootageType: Solid,
+            BackgroundColor: AAAA
+          },
+          {
+            Name: Green Solid,
+            Id: 73,
+            ItemType: Footage,
+            Width: 1920,
+            Height: 1080,
+            FootageType: Solid,
+            BackgroundColor: AAAA
+          },
+          {
+            Name: Missing Footage,
+            Id: 71,
+            ItemType: Footage,
+            Width: 1234,
+            Height: 5678,
+            Framerate: 123.45669555664062,
+            DurationSeconds: 127.0,
+            FootageType: Placeholder,
+            BackgroundColor: AAAA
+          },
+          {
+            Name: Red Solid 1,
+            Id: 72,
+            ItemType: Footage,
+            Width: 1920,
+            Height: 1080,
+            FootageType: Solid,
+            BackgroundColor: AAAA
+          }
+        ],
+        BackgroundColor: AAAA
+      },
+      {
+        Name: Solids,
+        Id: 77,
+        FolderContents: [
+          {
+            Name: Null 1,
+            Id: 78,
+            ItemType: Footage,
+            Width: 100,
+            Height: 100,
+            FootageType: Solid,
+            BackgroundColor: AAAA
+          }
+        ],
+        BackgroundColor: AAAA
+      }
+    ],
+    BackgroundColor: AAAA
+  }
+}

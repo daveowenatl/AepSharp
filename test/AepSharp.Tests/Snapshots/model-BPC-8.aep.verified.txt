@@ -1,0 +1,7 @@
+﻿{
+  ExpressionEngine: javascript-1.0,
+  RootFolder: {
+    Name: root,
+    BackgroundColor: AAAA
+  }
+}

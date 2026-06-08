@@ -1,0 +1,7 @@
+﻿{
+  ExpressionEngine: extendscript,
+  RootFolder: {
+    Name: root,
+    BackgroundColor: AAAA
+  }
+}
