@@ -1,0 +1,214 @@
+﻿{
+  ExpressionEngine: javascript-1.0,
+  RootFolder: {
+    Name: root,
+    FolderContents: [
+      {
+        Name: Comp 01,
+        Id: 1,
+        ItemType: Composition,
+        Width: 1920,
+        Height: 1080,
+        Framerate: 60.0,
+        DurationSeconds: 60.0,
+        BackgroundColor: AAAA,
+        CompositionLayers: [
+          {
+            Index: 1,
+            Name: Expression Controls,
+            SourceId: 13,
+            Quality: Best,
+            GuideEnabled: false,
+            SoloEnabled: false,
+            ThreeDEnabled: false,
+            AdjustmentLayerEnabled: false,
+            CollapseTransformEnabled: false,
+            ShyEnabled: false,
+            LockEnabled: false,
+            FrameBlendEnabled: false,
+            MotionBlurEnabled: false,
+            EffectsEnabled: true,
+            AudioEnabled: true,
+            VideoEnabled: true,
+            Effects: [
+              {
+                MatchName: ADBE Checkbox Control,
+                Name: Checkbox Control,
+                Label: ,
+                Index: 1,
+                PropertyType: Group,
+                Properties: [
+                  {
+                    MatchName: ADBE Checkbox Control-0001,
+                    Name: Checkbox,
+                    Label: ,
+                    Index: 1,
+                    PropertyType: Boolean
+                  }
+                ]
+              },
+              {
+                MatchName: ADBE Slider Control,
+                Name: Slider Control,
+                Label: ,
+                Index: 2,
+                PropertyType: Group,
+                Properties: [
+                  {
+                    MatchName: ADBE Slider Control-0001,
+                    Name: Slider,
+                    Label: ,
+                    Index: 1,
+                    PropertyType: OneD
+                  }
+                ]
+              },
+              {
+                MatchName: ADBE Point Control,
+                Name: Point Control,
+                Label: ,
+                Index: 3,
+                PropertyType: Group,
+                Properties: [
+                  {
+                    MatchName: ADBE Point Control-0001,
+                    Name: Point,
+                    Label: ,
+                    Index: 1,
+                    PropertyType: TwoD
+                  }
+                ]
+              },
+              {
+                MatchName: ADBE Point3D Control,
+                Name: 3D Point Control,
+                Label: ,
+                Index: 4,
+                PropertyType: Group,
+                Properties: [
+                  {
+                    MatchName: ADBE Point3D Control-0001,
+                    Name: 3D Point,
+                    Label: ,
+                    Index: 1,
+                    PropertyType: ThreeD
+                  }
+                ]
+              },
+              {
+                MatchName: ADBE Color Control,
+                Name: Color Control,
+                Label: ,
+                Index: 5,
+                PropertyType: Group,
+                Properties: [
+                  {
+                    MatchName: ADBE Color Control-0001,
+                    Name: Color,
+                    Label: ,
+                    Index: 1,
+                    PropertyType: Color
+                  }
+                ]
+              },
+              {
+                MatchName: ADBE Angle Control,
+                Name: Angle Control,
+                Label: Custom Angle Control Label,
+                Index: 6,
+                PropertyType: Group,
+                Properties: [
+                  {
+                    MatchName: ADBE Angle Control-0001,
+                    Name: Angle,
+                    Label: ,
+                    Index: 1,
+                    PropertyType: Angle
+                  }
+                ]
+              },
+              {
+                MatchName: ADBE Layer Control,
+                Name: Layer Control,
+                Label: ,
+                Index: 7,
+                PropertyType: Group,
+                Properties: [
+                  {
+                    MatchName: ADBE Layer Control-0001,
+                    Name: Layer,
+                    Label: ,
+                    Index: 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            Index: 2,
+            Name: Text Layer,
+            Quality: Best,
+            GuideEnabled: false,
+            SoloEnabled: false,
+            ThreeDEnabled: false,
+            AdjustmentLayerEnabled: false,
+            CollapseTransformEnabled: true,
+            ShyEnabled: false,
+            LockEnabled: false,
+            FrameBlendEnabled: false,
+            MotionBlurEnabled: false,
+            EffectsEnabled: true,
+            AudioEnabled: true,
+            VideoEnabled: true,
+            Text: {
+              MatchName: ADBE Text Properties,
+              Name: ADBE Text Properties,
+              Label: ,
+              PropertyType: Custom,
+              Properties: [
+                {
+                  MatchName: ADBE Text Document,
+                  Name: ADBE Text Document,
+                  Label: ,
+                  Index: 1,
+                  PropertyType: Custom
+                },
+                {
+                  MatchName: ADBE Text Path Options,
+                  Name: ADBE Text Path Options,
+                  Label: ,
+                  Index: 2,
+                  PropertyType: Custom
+                },
+                {
+                  MatchName: ADBE Text More Options,
+                  Name: ADBE Text More Options,
+                  Label: ,
+                  Index: 3,
+                  PropertyType: Custom
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        Name: Solids,
+        Id: 12,
+        FolderContents: [
+          {
+            Name: Null 1,
+            Id: 13,
+            ItemType: Footage,
+            Width: 100,
+            Height: 100,
+            FootageType: Solid,
+            BackgroundColor: AAAA
+          }
+        ],
+        BackgroundColor: AAAA
+      }
+    ],
+    BackgroundColor: AAAA
+  }
+}

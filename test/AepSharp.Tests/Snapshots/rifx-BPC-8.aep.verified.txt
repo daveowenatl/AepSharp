@@ -1,0 +1,38 @@
+﻿RIFX  Egg!  [offset 0x00000008]
+  [0x0000000c] svap  declared=4  consumed=4  | 0b 00 06 eb  '....'
+  [0x00000018] head  declared=20  consumed=20  | 00 5d 00 04 0b 00 06 eb 80 00 00 00 00 00 00 01…  '.]..............…'
+  [0x00000034] nhed  declared=32  consumed=32  | 00 00 00 00 00 00 00 05 00 01 00 00 1e 10 02 00…  '................…'
+  [0x0000005c] nnhd  declared=40  consumed=40  | 00 00 00 00 00 00 00 05 00 01 00 00 00 00 00 1e…  '................…'
+  [0x0000008c] adfr  declared=8  consumed=8  | 40 e7 70 00 00 00 00 00  '@.p.....'
+  [0x0000009c] LIST  declared=4  consumed=4  -> Pefl
+  [0x000000a8] qtlg  declared=1  consumed=1  | 00  '.'
+  [0x000000b2] LIST  declared=48  consumed=48  -> gpuG
+    [0x000000be] Utf8  declared=36  consumed=36  | 37 65 65 30 61 62 35 39 2d 38 32 32 64 2d 34 34…  '7ee0ab59-822d-44…'
+  [0x000000ea] LIST  declared=30  consumed=30  -> sfnm
+    [0x000000f6] Utf8  declared=6  consumed=6  | 53 6f 6c 69 64 73  'Solids'
+    [0x00000104] sfid  declared=4  consumed=4  | 00 00 00 00  '....'
+  [0x00000110] acer  declared=1  consumed=1  | 01  '.'
+  [0x0000011a] LIST  declared=4  consumed=4  -> CPPl
+  [0x00000126] cpid  declared=16  consumed=16  | ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  '................'
+  [0x0000013e] dwga  declared=4  consumed=4  | 01 00 00 00  '....'
+  [0x0000014a] LIST  declared=26  consumed=26  -> ExEn
+    [0x00000156] Utf8  declared=14  consumed=14  | 6a 61 76 61 73 63 72 69 70 74 2d 31 2e 30  'javascript-1.0'
+  [0x0000016c] LIST  declared=26  consumed=26  -> Fold
+    [0x00000178] fdta  declared=14  consumed=14  | 00 00 00 00 00 00 00 00 00 00 ce 35 63 01  '...........5c.'
+  [0x0000018e] wsns  declared=2  consumed=2  | 00 10  '..'
+  [0x00000198] wsnm  declared=16  consumed=16  | 53 00 74 00 61 00 6e 00 64 00 61 00 72 00 64 00  'S.t.a.n.d.a.r.d.'
+  [0x000001b0] Utf8  declared=8  consumed=8  | 53 74 61 6e 64 61 72 64  'Standard'
+  [0x000001c0] fcid  declared=4  consumed=4  | 00 00 00 00  '....'
+  [0x000001cc] oacc  declared=2  consumed=2  | 00 00  '..'
+  [0x000001d6] LIST  declared=1884  consumed=1884  -> LSIf
+    [0x000001e2] AFsi  declared=1872  consumed=1872  | 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00…  '................…'
+  [0x0000093a] LIST  declared=2020  consumed=2020  -> LRdr
+    [0x00000946] Rhed  declared=20  consumed=20  | 00 01 00 02 00 00 00 00 00 00 00 00 01 93 03 96…  '................…'
+    [0x00000962] Rout  declared=4  consumed=4  | 00 00 00 00  '....'
+    [0x0000096e] LIST  declared=64  consumed=64  -> list
+      [0x0000097a] lhd3  declared=52  consumed=52  | 00 d0 0b ee 00 00 00 00 00 00 00 00 00 00 00 01…  '................…'
+    [0x000009b6] LIST  declared=4  consumed=4  -> LItm
+    [0x000009c2] LIST  declared=1884  consumed=1884  -> LSIf
+      [0x000009ce] ARsi  declared=1872  consumed=1872  | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00…  '................…'
+  [0x00001126] LIST  declared=68  consumed=68  -> PTRE
+    [0x00001132] ftwd  declared=56  consumed=56  | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00…  '................…'
