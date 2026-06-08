@@ -6,8 +6,6 @@
 Reads Adobe After Effects `.aep` files in C#: compositions, footage, folders, layers,
 and their effect and text properties. No After Effects install or ExtendScript needed.
 
-Port of [boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser) (Go).
-
 ## Install
 
 ```bash
@@ -45,8 +43,6 @@ the rest), and its `Effects` and `Text` property trees.
 
 ## What it reads
 
-Scope matches the upstream Go library.
-
 Reads:
 
 - Project metadata (expression engine, bit depth)
@@ -77,9 +73,8 @@ hex/ascii preview, and a flag if it looks truncated or overflowing.
 
 ## Tested against
 
-The fixtures from the upstream project (After Effects around 2022), plus current
-templates in production. If a file reads wrong, open an issue with the `aepdump`
-output.
+A set of real `.aep` fixtures (After Effects around 2022), plus current templates in
+production. If a file reads wrong, open an issue with the `aepdump` output.
 
 ## Credits
 
