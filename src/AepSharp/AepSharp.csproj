@@ -1,10 +1,37 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <!-- NuGet package metadata -->
+  <PropertyGroup>
+    <PackageId>AepSharp</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Dave Owen</Authors>
+    <Description>A native C# parser for Adobe After Effects (.aep) project files. Reads project structure, compositions, footage items, layers, and effect/text properties from the RIFX binary format — no After Effects install or ExtendScript required. A port of boltframe/aftereffects-aep-parser.</Description>
+    <PackageTags>after-effects;aep;adobe;parser;rifx;riff;nexrender;motion-graphics</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/daveowenatl/AepSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/daveowenatl/AepSharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Copyright>Copyright (c) 2026 Dave Owen</Copyright>
+  </PropertyGroup>
+
+  <!-- Symbols + SourceLink (built-in) for a debuggable published package -->
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="AepSharp.Tests" />
