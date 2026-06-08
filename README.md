@@ -3,22 +3,21 @@
 [![CI](https://github.com/daveowenatl/AepSharp/actions/workflows/ci.yml/badge.svg)](https://github.com/daveowenatl/AepSharp/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/AepSharp.svg)](https://www.nuget.org/packages/AepSharp/)
 
-A native C# parser for Adobe After Effects **`.aep`** project files. Read project
-structure, compositions, footage, layers, and effect/text properties directly from
-the binary file — no After Effects install and no ExtendScript engine required.
+Reads Adobe After Effects `.aep` files in C#. You get the project's compositions,
+footage, folders, layers, and their effect and text properties without opening After
+Effects or running ExtendScript.
 
-It's a port of the Go library
-[boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser).
+It's a port of [boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser),
+a Go library. They did the work of figuring out the format.
 
-## Why
+## Why this exists
 
-After Effects projects are stored as RIFX (big-endian RIFF). Traditionally the only
-way to inspect one programmatically is to drive the ExtendScript engine inside a
-running copy of After Effects (Windows/macOS only, slow, heavyweight). AepSharp reads
-the file statically, so you can answer questions like "what compositions are in this
-template, and at what resolution and frame rate?" from any .NET app — handy for
-render pipelines (e.g. feeding composition names to [nexrender](https://github.com/inlife/nexrender)),
-asset catalogs, and tooling.
+`.aep` files are RIFX, which is just big-endian RIFF. Normally the only way to read
+one in code is to script a running copy of After Effects, which is Windows/macOS only
+and slow. AepSharp reads the bytes directly. If you need to know what compositions are
+in a template and their size and frame rate, say to list them in a UI or hand a name
+off to [nexrender](https://github.com/inlife/nexrender), this does that from any .NET
+app.
 
 ## Install
 
@@ -35,7 +34,7 @@ using AepSharp;
 
 var project = AepProject.Open("template.aep");
 
-// Enumerate compositions — e.g. to populate a dropdown.
+// List the compositions, e.g. to populate a dropdown.
 foreach (var item in project.Items.Values)
 {
     if (item.ItemType == ItemType.Composition)
@@ -43,65 +42,66 @@ foreach (var item in project.Items.Values)
 }
 ```
 
-`AepProject.Open(path)` (or `AepProject.FromStream(stream)`) returns:
+`AepProject.Open(path)` (or `AepProject.FromStream(stream)`) gives you:
 
-- `ExpressionEngine` — e.g. `javascript-1.0`
-- `Depth` — bits per channel (`Bpc8` / `Bpc16` / `Bpc32`)
-- `RootFolder` — the project's item tree (`AepItem` with `FolderContents`)
-- `Items` — every item by id (`Dictionary<uint, AepItem>`)
+- `ExpressionEngine`, e.g. `javascript-1.0`
+- `Depth`, the bit depth (`Bpc8`, `Bpc16`, `Bpc32`)
+- `RootFolder`, the project's item tree (`AepItem` with `FolderContents`)
+- `Items`, every item keyed by id (`Dictionary<uint, AepItem>`)
 
-Each `AepItem` exposes `Name`, `Id`, `ItemType` (`Folder` / `Composition` / `Footage`),
-plus `Width`, `Height`, `Framerate`, `DurationSeconds`, `FootageType`, and
-`CompositionLayers`. Each `AepLayer` exposes its index, name, source id, quality and
-blend modes, the full set of layer flags (3D, solo, shy, locked, adjustment, …), and
-its `Effects` / `Text` property trees.
+An `AepItem` has `Name`, `Id`, `ItemType` (`Folder`, `Composition`, or `Footage`),
+and for comps and footage, `Width`, `Height`, `Framerate`, `DurationSeconds`,
+`FootageType`, and `CompositionLayers`. An `AepLayer` carries its index, name, source
+id, quality and blend modes, the layer flags (3D, solo, shy, locked, adjustment, and
+the rest), and its `Effects` and `Text` property trees.
 
-## What it parses (and what it doesn't)
+## What it reads, and what it doesn't
 
-This is a deliberately bounded, honest scope — it matches the upstream Go library.
+The scope matches the upstream Go library. It's not the whole format.
 
-**Parsed:**
+Reads:
+
 - Project metadata (expression engine, bit depth)
-- The folder / item tree
-- Compositions (dimensions, frame rate, duration, background color)
-- Footage items (dimensions, frame rate, duration, solid/placeholder)
-- Layers (flags, quality, sampling/frame-blend modes, source)
-- Effect and text **property names and structure**
+- The folder and item tree
+- Compositions: dimensions, frame rate, duration, background color
+- Footage: dimensions, frame rate, duration, solid or placeholder
+- Layers: flags, quality, sampling and frame-blend modes, source
+- Effect and text property names and structure
 
-**Not parsed (yet):**
-- Keyframes and animated property **values**
+Doesn't read (yet):
+
+- Keyframes and animated property values
 - Transform values, masks, markers
 
-If you need a field that isn't exposed, the `aepdump` tool (below) shows you exactly
-where it lives in the binary so it can be added.
+If you need a field that isn't here, run `aepdump` (below) to find where it sits in
+the file, and it can be added.
 
 ## aepdump
 
-A small CLI for inspecting the RIFX chunk tree — useful for debugging and for
-reverse-engineering chunks not yet parsed:
+A small CLI for looking at the raw RIFX chunk tree. Handy for debugging and for
+working out where an unparsed field lives.
 
 ```bash
 dotnet run --project src/AepSharp.Tools -- template.aep
 dotnet run --project src/AepSharp.Tools -- template.aep --format json
 ```
 
-It prints every chunk with its absolute offset, FourCC, declared vs. consumed size,
-a hex+ascii preview, and flags any anomalous (truncated / size-overflowing) chunks.
+Every chunk prints with its absolute offset, FourCC, declared vs. actual size, a
+hex/ascii preview, and a flag if it looks truncated or overflowing.
 
-## Verified versions
+## Versions tested
 
-Parsing is regression-tested with snapshot baselines over the fixture set inherited
-from the upstream project (After Effects circa 2022). It is used against current
-After Effects templates in production. If you hit a file that misreads, please open an
-issue with `aepdump` output (you can redact payload previews).
+Parsing is snapshot-tested against the fixtures from the upstream project (After
+Effects around 2022), and it runs against current templates in production. If you hit
+a file that reads wrong, open an issue with the `aepdump` output. Redact the previews
+if you need to.
 
 ## Credits
 
-A port of [boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser)
-(MIT). The hard reverse-engineering of the AEP format is theirs; this project brings it
-to native .NET. See [their README](https://github.com/boltframe/aftereffects-aep-parser)
-for the research notes and Kaitai struct definition.
+Port of [boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser)
+(MIT). The hard part, reverse-engineering the format, is theirs. Their README has the
+research notes and a Kaitai definition if you want to dig into the binary yourself.
 
 ## License
 
-[MIT](LICENSE) — © 2026 Dave Owen, © 2020 Boltframe.
+[MIT](LICENSE). © 2026 Dave Owen, © 2020 Boltframe.
