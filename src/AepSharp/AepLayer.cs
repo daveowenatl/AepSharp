@@ -26,6 +26,13 @@ public class AepLayer
     public List<AepProperty> Effects { get; internal set; } = new();
     public AepProperty? Text { get; internal set; }
 
+    /// <summary>
+    /// The layer's on-screen text copy, decoded from the text-document EngineData
+    /// blob. Null for non-text layers; "" when the text run is empty. Best-effort:
+    /// see <see cref="EngineData"/> for the heuristic's known limits.
+    /// </summary>
+    public string? SourceText { get; internal set; }
+
     internal static AepLayer Parse(RifxList layerHead, AepProject project)
     {
         var layer = new AepLayer();
@@ -78,8 +85,46 @@ public class AepLayer
         if (rootTDGP.TryGetValue("ADBE Text Properties", out var textTDGP))
         {
             layer.Text = AepProperty.ParseFromList(textTDGP, "ADBE Text Properties");
+            layer.SourceText = ExtractSourceText(layerHead);
         }
 
         return layer;
+    }
+
+    /// <summary>
+    /// Decodes the layer's display copy from its text-document EngineData blob.
+    /// That blob is the single anomalous (ANON) block in the layer's subtree —
+    /// the reader captures it as anomalous because its leading bytes look like a
+    /// bogus chunk size. Returns "" if found-but-empty, null if not found.
+    /// </summary>
+    private static string? ExtractSourceText(RifxList layerHead)
+    {
+        var block = FindEngineDataBlock(layerHead);
+        return block is null ? null : EngineData.ExtractDisplayText(block.GetBytes());
+    }
+
+    private static RifxBlock? FindEngineDataBlock(RifxList list)
+    {
+        foreach (var block in list.Blocks)
+        {
+            if (block.IsAnomalous && block.Data is byte[] bytes && HasEngineDataSignature(bytes))
+                return block;
+            if (block.Data is RifxList sub)
+            {
+                var found = FindEngineDataBlock(sub);
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
+    }
+
+    private static bool HasEngineDataSignature(byte[] bytes)
+    {
+        // The EngineData run strings begin with '(' + FE FF (UTF-16BE BOM).
+        for (var i = 0; i + 2 < bytes.Length; i++)
+            if (bytes[i] == 0x28 && bytes[i + 1] == 0xFE && bytes[i + 2] == 0xFF)
+                return true;
+        return false;
     }
 }

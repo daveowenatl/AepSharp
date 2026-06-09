@@ -188,7 +188,8 @@
                   PropertyType: Custom
                 }
               ]
-            }
+            },
+            SourceText: Text Layer
           }
         ]
       },
