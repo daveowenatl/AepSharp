@@ -188,7 +188,30 @@
                   PropertyType: Custom
                 }
               ]
-            }
+            },
+            SourceText: Text Layer,
+            Fonts: [
+              BritannicBold,
+              Myriad-Roman,
+              AdobeInvisFont
+            ],
+            TextRuns: [
+              {
+                Text: Text Layer,
+                FontName: BritannicBold,
+                FontSize: 185.0,
+                FillColor: [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                StrokeColor: [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ]
           }
         ]
       },

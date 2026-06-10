@@ -50,7 +50,10 @@ internal static class RifxDump
 
         if (block.Data is RifxList list)
         {
-            sb.Append("  -> ").Append(Fourcc(list.Identifier)).Append('\n');
+            sb.Append("  -> ").Append(Fourcc(list.Identifier));
+            if (list.RawPayload is { } payload)
+                sb.Append("  (opaque payload, ").Append(payload.Length).Append(" bytes)");
+            sb.Append('\n');
             foreach (var child in list.Blocks)
                 WriteBlock(sb, child, depth + 1, options);
         }
@@ -71,13 +74,16 @@ internal static class RifxDump
 
     private static Dictionary<string, object?> ListNode(RifxList list, Options options)
     {
-        return new Dictionary<string, object?>
+        var node = new Dictionary<string, object?>
         {
             ["kind"] = "list",
             ["identifier"] = list.Identifier,
             ["offset"] = list.Offset,
             ["blocks"] = list.Blocks.ConvertAll(b => BlockNode(b, options)),
         };
+        if (list.RawPayload is { } payload)
+            node["opaquePayloadLength"] = payload.Length;
+        return node;
     }
 
     private static Dictionary<string, object?> BlockNode(RifxBlock block, Options options)

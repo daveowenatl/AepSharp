@@ -5,6 +5,14 @@ namespace AepSharp.Rifx;
 
 internal static class RifxReader
 {
+    /// <summary>
+    /// LIST identifiers whose contents are an opaque payload, not RIFF chunks.
+    /// "btdk" carries a text layer's EngineData (PostScript-style text); parsing it
+    /// as chunks only "works" by accident when its leading bytes misparse as an
+    /// oversized chunk. Captured raw into <see cref="RifxList.RawPayload"/> instead.
+    /// </summary>
+    private static readonly string[] OpaqueListIdentifiers = ["btdk"];
+
     public static RifxList FromStream(Stream stream)
     {
         long pos = 0;
@@ -27,6 +35,14 @@ internal static class RifxReader
         var idBytes = new byte[4];
         bytesRead += ReadExact(stream, idBytes, ref pos);
         list.Identifier = Encoding.ASCII.GetString(idBytes);
+
+        if (Array.IndexOf(OpaqueListIdentifiers, list.Identifier) >= 0)
+        {
+            var payload = new byte[limit - bytesRead];
+            ReadExact(stream, payload, ref pos);
+            list.RawPayload = payload;
+            return list;
+        }
 
         while (bytesRead < limit)
         {
