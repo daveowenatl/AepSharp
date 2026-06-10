@@ -42,6 +42,14 @@ public class AepLayer
     /// </summary>
     public IReadOnlyList<string> Fonts { get; internal set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// The text layer's copy split into styled runs (per-character StyleRun), each
+    /// carrying its own font, size, and fill/stroke colour. One run for uniform text;
+    /// several when the copy mixes styles. Empty for non-text layers or when the
+    /// EngineData could not be parsed structurally.
+    /// </summary>
+    public IReadOnlyList<AepTextRun> TextRuns { get; internal set; } = Array.Empty<AepTextRun>();
+
     internal static AepLayer Parse(RifxList layerHead, AepProject project)
     {
         var layer = new AepLayer();
@@ -120,6 +128,7 @@ public class AepLayer
             {
                 layer.SourceText = document.Text;
                 layer.Fonts = document.Fonts;
+                layer.TextRuns = BuildTextRuns(document);
                 return;
             }
         }
@@ -129,6 +138,27 @@ public class AepLayer
         }
 
         layer.SourceText = EngineData.ExtractDisplayText(bytes);
+    }
+
+    private static List<AepTextRun> BuildTextRuns(EngineModel.EngineTextDocument document)
+    {
+        var runs = new List<AepTextRun>(document.StyledRuns.Count);
+        foreach (var run in document.StyledRuns)
+        {
+            string? fontName = null;
+            if (run.FontIndex is { } i && i >= 0 && i < document.Fonts.Count)
+                fontName = document.Fonts[i];
+
+            runs.Add(new AepTextRun
+            {
+                Text = run.Text,
+                FontName = fontName,
+                FontSize = run.FontSize,
+                FillColor = run.Fill,
+                StrokeColor = run.Stroke,
+            });
+        }
+        return runs;
     }
 
     /// <summary>
