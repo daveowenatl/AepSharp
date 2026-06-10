@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using AepSharp.EngineModel;
 using AepSharp.Rifx;
 
 namespace AepSharp;
@@ -100,7 +101,26 @@ public class AepLayer
     private static string? ExtractSourceText(RifxList layerHead)
     {
         var block = FindEngineDataBlock(layerHead);
-        return block is null ? null : EngineData.ExtractDisplayText(block.GetBytes());
+        if (block is null)
+            return null;
+
+        var bytes = block.GetBytes();
+
+        // Prefer the structural parse: it reads the run text by key path, which
+        // concatenates multi-run text correctly and keeps CJK copy. Fall back to the
+        // heuristic only if the blob doesn't parse into a text document.
+        try
+        {
+            var document = EngineTextExtractor.Extract(EngineDataParser.Parse(bytes));
+            if (document is not null)
+                return document.Text;
+        }
+        catch (InvalidDataException)
+        {
+            // malformed EngineData — fall through to the tolerant heuristic
+        }
+
+        return EngineData.ExtractDisplayText(bytes);
     }
 
     private static RifxBlock? FindEngineDataBlock(RifxList list)
