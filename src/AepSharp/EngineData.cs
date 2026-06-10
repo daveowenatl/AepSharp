@@ -5,10 +5,9 @@ namespace AepSharp;
 
 /// <summary>
 /// Decodes the Adobe "EngineData" / CoolType text-document blob that carries a
-/// text layer's on-screen copy. In a parsed .aep this blob is the bytes of the
-/// anomalous (<see cref="Rifx.RifxBlock.IsAnomalous"/>) block inside a text
-/// layer's subtree — the reader captures it as ANON because its leading bytes
-/// (" &lt;&lt; ") look like a bogus chunk size.
+/// text layer's on-screen copy. In a parsed .aep this blob is the raw payload of
+/// the layer's "btdk" list (see <see cref="Rifx.RifxList.RawPayload"/>), with an
+/// anomalous-block fallback for variants where the blob sits outside btdk.
 ///
 /// The format is a nested PostScript-ish dictionary. Strings are written as
 /// <c>( FE FF &lt;UTF-16BE bytes&gt; )</c> with byte-level <c>\(</c> <c>\)</c>

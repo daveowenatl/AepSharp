@@ -98,6 +98,18 @@ public class RobustnessTests
         Assert.Throws<FileNotFoundException>(() => AepProject.Open("nonexistent.aep"));
     }
 
+    [Fact]
+    public void ShortNhedPayload_ThrowsInvalidDataException()
+    {
+        // Structurally valid RIFX, but the nhed payload is shorter than the offset
+        // the model parser reads (BPC at byte 15). Must surface as the documented
+        // InvalidDataException, not IndexOutOfRangeException from raw indexing.
+        var nhedData = new byte[8]; // parser reads nhedData[15]
+        var bytes = BuildMinimalRifx("Egg!", new[] { ("nhed", nhedData) });
+        using var stream = new MemoryStream(bytes);
+        Assert.Throws<InvalidDataException>(() => AepProject.FromStream(stream));
+    }
+
     /// <summary>
     /// Build a minimal RIFX byte array with an identifier and flat (non-LIST) blocks.
     /// </summary>

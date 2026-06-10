@@ -755,8 +755,7 @@
                 [0x00007156] tdsn  declared=14  consumed=14  | 55 74 66 38 00 00 00 06 2d 5f 30 5f 2f 2d  'Utf8....-_0_/-'
                 [0x0000716c] tdb4  declared=124  consumed=124  | db 99 00 01 00 01 00 00 00 01 00 04 00 00 78 00…  '..............x.…'
                 [0x000071f0] cdat  declared=4  consumed=4  | 00 00 00 00  '....'
-              [0x000071fc] LIST  declared=6835  consumed=6835  -> btdk
-                [0x00007208] ANON  declared=540818464  consumed=6831  ** ANOMALOUS (declared size exceeds remaining bytes) **  | 20 2f 39 38 20 3c 3c 20 2f 30 20 39 20 3e 3e 20…  ' /98 << /0 9 >> …'
+              [0x000071fc] LIST  declared=6835  consumed=6835  -> btdk  (opaque payload, 6831 bytes)
             [0x00008cb8] LIST  declared=52  consumed=52  -> btgu
               [0x00008cc4] pgui  declared=16  consumed=16  | b4 e8 38 0b ca b9 45 d4 97 a2 ff 8a 80 8d 00 69  '..8...E........i'
               [0x00008cdc] pgui  declared=16  consumed=16  | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  '................'

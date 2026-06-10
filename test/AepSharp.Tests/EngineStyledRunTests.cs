@@ -31,7 +31,7 @@ public class EngineStyledRunTests
 
     private static EngineValue Color(params double[] argb) => D(("0", D(("1", Arr(Array.ConvertAll(argb, N))))));
 
-    private static EngineValue Span(int len, int fontIdx, double size, double[] fill, double[] stroke)
+    private static EngineValue Span(double len, int fontIdx, double size, double[] fill, double[] stroke)
     {
         var style = D(
             ("0", N(fontIdx)),
@@ -75,6 +75,24 @@ public class EngineStyledRunTests
         Assert.Equal(50, b.FontSize);
         Assert.Equal(new double[] { 0, 0, 1 }, b.Fill);   // blue
         Assert.Equal(new double[] { 1, 1, 1 }, b.Stroke); // white
+    }
+
+    [Fact]
+    public void HostileSpanLengthsDoNotCorruptSlicing()
+    {
+        // A corrupt blob can carry a negative or absurdly large span length. The
+        // cursor must never move backwards (which would duplicate text into later
+        // runs) and large lengths must clamp to the remaining text.
+        var doc = EngineTextExtractor.Extract(Document(
+            "ABCD",
+            Span(-5, 0, 10, new double[] { 1, 0, 0, 0 }, new double[] { 1, 0, 0, 0 }),
+            Span(2, 0, 10, new double[] { 1, 0, 0, 0 }, new double[] { 1, 0, 0, 0 }),
+            Span(1e10, 0, 10, new double[] { 1, 0, 0, 0 }, new double[] { 1, 0, 0, 0 })));
+
+        Assert.Equal(3, doc!.StyledRuns.Count);
+        Assert.Equal("", doc.StyledRuns[0].Text);     // negative length -> empty, no rewind
+        Assert.Equal("AB", doc.StyledRuns[1].Text);   // starts at 0, not at -5
+        Assert.Equal("CD", doc.StyledRuns[2].Text);   // huge length clamps to remainder
     }
 
     [Fact]

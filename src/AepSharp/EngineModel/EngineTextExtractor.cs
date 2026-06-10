@@ -93,7 +93,13 @@ internal static class EngineTextExtractor
             {
                 if (spanValue is not EngineDict span)
                     continue;
-                var len = (int)((span.Get("1") as EngineNumber)?.Value ?? 0);
+                // A corrupt blob can carry a negative or out-of-int-range span length;
+                // clamp to [0, remaining] so the cursor never rewinds (which would
+                // duplicate text into later runs) and never overflows.
+                var rawLen = (span.Get("1") as EngineNumber)?.Value ?? 0;
+                var len = double.IsNaN(rawLen)
+                    ? 0
+                    : (int)Math.Clamp(rawLen, 0, text.Length - pos);
                 var slice = Slice(text, pos, len);
                 pos += len;
 

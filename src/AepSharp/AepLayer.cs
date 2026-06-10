@@ -109,18 +109,17 @@ public class AepLayer
     }
 
     /// <summary>
-    /// Decodes the layer's text-document EngineData blob into <see cref="SourceText"/>
-    /// and <see cref="Fonts"/>. The blob is the single anomalous (ANON) block in the
-    /// layer's subtree. Prefers the structural parse; falls back to the heuristic for
-    /// text-only when a blob won't parse.
+    /// Decodes the layer's text-document EngineData blob into <see cref="SourceText"/>,
+    /// <see cref="Fonts"/>, and <see cref="TextRuns"/>. The blob is located via the
+    /// "btdk" list's opaque payload (with an ANON-block fallback). Prefers the
+    /// structural parse; falls back to the heuristic for text-only when a blob won't
+    /// parse.
     /// </summary>
     private static void PopulateTextContent(AepLayer layer, RifxList layerHead)
     {
-        var block = FindEngineDataBlock(layerHead);
-        if (block is null)
+        var bytes = FindEngineDataBytes(layerHead);
+        if (bytes is null)
             return;
-
-        var bytes = block.GetBytes();
         try
         {
             var document = EngineTextExtractor.Extract(EngineDataParser.Parse(bytes));
@@ -162,20 +161,41 @@ public class AepLayer
     }
 
     /// <summary>
-    /// Decodes the layer's display copy from its text-document EngineData blob.
-    /// That blob is the single anomalous (ANON) block in the layer's subtree —
-    /// the reader captures it as anomalous because its leading bytes look like a
-    /// bogus chunk size. Returns "" if found-but-empty, null if not found.
+    /// Locates the layer's text-document EngineData. Primary signal: the "btdk"
+    /// list, whose raw payload the reader captures opaquely — a stable format
+    /// anchor. Fallback: an anomalous (ANON) block carrying the EngineData string
+    /// signature, for variants where the blob sits outside a btdk list.
     /// </summary>
-    private static RifxBlock? FindEngineDataBlock(RifxList list)
+    private static byte[]? FindEngineDataBytes(RifxList layerHead)
+    {
+        return FindBtdkPayload(layerHead) ?? FindAnomalousEngineData(layerHead);
+    }
+
+    private static byte[]? FindBtdkPayload(RifxList list)
+    {
+        if (list.Identifier == "btdk" && list.RawPayload is { } payload)
+            return payload;
+        foreach (var block in list.Blocks)
+        {
+            if (block.Data is RifxList sub)
+            {
+                var found = FindBtdkPayload(sub);
+                if (found != null)
+                    return found;
+            }
+        }
+        return null;
+    }
+
+    private static byte[]? FindAnomalousEngineData(RifxList list)
     {
         foreach (var block in list.Blocks)
         {
             if (block.IsAnomalous && block.Data is byte[] bytes && HasEngineDataSignature(bytes))
-                return block;
+                return bytes;
             if (block.Data is RifxList sub)
             {
-                var found = FindEngineDataBlock(sub);
+                var found = FindAnomalousEngineData(sub);
                 if (found != null)
                     return found;
             }

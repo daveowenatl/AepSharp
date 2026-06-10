@@ -165,7 +165,12 @@ internal static class EngineDataParser
             if (_pos == start)
                 throw new InvalidDataException($"Unexpected token at offset {_pos}");
             var text = Encoding.ASCII.GetString(data, start, _pos - start);
-            return new EngineNumber { Value = double.Parse(text, CultureInfo.InvariantCulture) };
+            // The char filter admits sequences double.Parse rejects ("1.2.3", "-",
+            // "5-3"); surface those as InvalidDataException, the contract callers
+            // catch — never FormatException.
+            if (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+                throw new InvalidDataException($"Malformed number '{text}' at offset {start}");
+            return new EngineNumber { Value = value };
         }
 
         private bool Match(string literal)

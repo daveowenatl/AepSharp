@@ -131,6 +131,20 @@ public class EngineDataParserTests
         Assert.Equal(36.0, ((EngineNumber)doc.Get("14")!).Value);
     }
 
+    [Theory]
+    [InlineData("<< /0 1.2.3 >>")]
+    [InlineData("<< /0 - >>")]
+    [InlineData("<< /0 . >>")]
+    [InlineData("<< /0 5-3 >>")]
+    [InlineData("<< /0 +- >>")]
+    public void MalformedNumbersThrowInvalidDataException(string input)
+    {
+        // The char filter accepts [+-.0-9] sequences double.Parse rejects. Those must
+        // surface as InvalidDataException (the contract callers catch), never
+        // FormatException — one bad blob must not crash AepProject.Open.
+        Assert.Throws<InvalidDataException>(() => Parse(input));
+    }
+
     [Fact]
     public void ParsesAnArrayOfRunDicts()
     {

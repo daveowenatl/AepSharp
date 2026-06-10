@@ -22,6 +22,15 @@ return app.Run(args);
 
 // ---------------------------------------------------------------------------
 
+/// <summary>Error messages belong on stderr so piped/captured stdout stays clean.</summary>
+internal static class ErrorConsole
+{
+    public static readonly IAnsiConsole Instance = AnsiConsole.Create(new AnsiConsoleSettings
+    {
+        Out = new AnsiConsoleOutput(Console.Error),
+    });
+}
+
 internal sealed class TreeSettings : CommandSettings
 {
     [CommandArgument(0, "<file>")]
@@ -126,7 +135,7 @@ internal sealed class TreeCommand : Command<TreeSettings>
 
     private static int Error(string message)
     {
-        AnsiConsole.MarkupLineInterpolated($"[red]aepdump:[/] {message}");
+        ErrorConsole.Instance.MarkupLineInterpolated($"[red]aepdump:[/] {message}");
         return 1;
     }
 }
@@ -171,7 +180,7 @@ internal sealed class RifxCommand : Command<RifxSettings>
         }
         catch (Exception ex) when (ex is InvalidDataException or EndOfStreamException)
         {
-            AnsiConsole.MarkupLineInterpolated($"[red]aepdump:[/] not a readable RIFX/.aep file: {ex.Message}");
+            ErrorConsole.Instance.MarkupLineInterpolated($"[red]aepdump:[/] not a readable RIFX/.aep file: {ex.Message}");
             return 1;
         }
 

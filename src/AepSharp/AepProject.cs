@@ -18,7 +18,18 @@ public class AepProject
     public static AepProject FromStream(Stream stream)
     {
         var root = RifxReader.FromStream(stream);
-        return Parse(root);
+        try
+        {
+            return Parse(root);
+        }
+        catch (Exception ex) when (ex is IndexOutOfRangeException or ArgumentOutOfRangeException)
+        {
+            // Model parsing reads fixed offsets inside block payloads (nhed, idta,
+            // sspc, cdta, ldta). A structurally valid RIFX whose payloads are shorter
+            // than those offsets must surface as the documented InvalidDataException,
+            // not a raw out-of-range crash.
+            throw new InvalidDataException("Malformed .aep: a block payload is shorter than its expected layout", ex);
+        }
     }
 
     internal static AepProject Parse(RifxList root)
