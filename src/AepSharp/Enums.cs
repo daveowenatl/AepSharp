@@ -16,8 +16,18 @@ public enum ItemType
 
 public enum FootageType : ushort
 {
+    /// <summary>Raster still image (.png, .jpg, …).</summary>
+    Image = 0x01,
+    /// <summary>Stand-in for missing/external media.</summary>
     Placeholder = 0x02,
-    Solid = 0x09
+    /// <summary>Time-based media: movie or audio (.mp4, .mov, .mp3, .wav).</summary>
+    AudioVideo = 0x05,
+    /// <summary>Illustrator / vector artwork (.ai).</summary>
+    Vector = 0x08,
+    /// <summary>A solid-colour source; AE adjustment layers are solids too.</summary>
+    Solid = 0x09,
+    /// <summary>Layered Photoshop document (.psd).</summary>
+    Photoshop = 0x109
 }
 
 public enum LayerQuality : ushort

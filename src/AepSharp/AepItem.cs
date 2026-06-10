@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Text;
+using System.Text.Json;
 using AepSharp.Rifx;
 
 namespace AepSharp;
@@ -17,6 +18,13 @@ public class AepItem
     public FootageType FootageType { get; internal set; }
     public byte[] BackgroundColor { get; internal set; } = new byte[3];
     public List<AepLayer> CompositionLayers { get; internal set; } = new();
+
+    /// <summary>
+    /// For file-backed footage (image, audio/video, vector, Photoshop), the source
+    /// file path recorded in the item's alias. Null for solids, placeholders, and
+    /// non-footage items, or when the alias can't be read.
+    /// </summary>
+    public string? SourcePath { get; internal set; }
 
     internal static AepItem Parse(RifxList itemHead, AepProject project, bool isRoot = false)
     {
@@ -107,6 +115,13 @@ public class AepItem
                                 }
                         }
                     }
+
+                    // File-backed footage (image / AV / vector / Photoshop): the
+                    // source path lives in the alias block, not opti. Solids and
+                    // placeholders are synthetic and have no source file.
+                    item.SourcePath = ExtractSourcePath(pinList);
+                    if (string.IsNullOrEmpty(item.Name) && item.SourcePath is { } sourcePath)
+                        item.Name = FileNameFromPath(sourcePath);
                     break;
                 }
             case ItemType.Composition:
@@ -140,6 +155,53 @@ public class AepItem
 
         project.Items[item.Id] = item;
         return item;
+    }
+
+    /// <summary>
+    /// Reads the footage source path from the Pin list's alias. Modern After
+    /// Effects stores the alias as a JSON object with a "fullpath" field; older
+    /// versions use a binary Mac alias record, which we don't decode (returns null).
+    /// </summary>
+    private static string? ExtractSourcePath(RifxList pinList)
+    {
+        var alasBlock = pinList.SublistFind("Als2")?.FindByType("alas");
+        return alasBlock == null ? null : ParseAliasPath(alasBlock.GetBytes());
+    }
+
+    /// <summary>
+    /// Reads the "fullpath" from a modern (JSON) After Effects alias record.
+    /// Returns null for the older binary Mac alias format, missing/empty fullpath,
+    /// or malformed JSON.
+    /// </summary>
+    internal static string? ParseAliasPath(byte[] aliasBytes)
+    {
+        var text = Encoding.UTF8.GetString(aliasBytes);
+        var start = text.IndexOf('{');
+        var end = text.LastIndexOf('}');
+        if (start < 0 || end <= start)
+            return null; // not the JSON alias format
+
+        try
+        {
+            using var doc = JsonDocument.Parse(text.Substring(start, end - start + 1));
+            if (doc.RootElement.TryGetProperty("fullpath", out var fullPath)
+                && fullPath.ValueKind == JsonValueKind.String)
+            {
+                var path = fullPath.GetString();
+                return string.IsNullOrEmpty(path) ? null : path;
+            }
+        }
+        catch (JsonException)
+        {
+            // malformed alias JSON — treat as no source path
+        }
+        return null;
+    }
+
+    private static string FileNameFromPath(string path)
+    {
+        var slash = path.LastIndexOfAny(['/', '\\']);
+        return slash >= 0 ? path[(slash + 1)..] : path;
     }
 
     private static string ExtractNullPaddedString(byte[] data)
