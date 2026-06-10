@@ -29,10 +29,18 @@ public class AepLayer
 
     /// <summary>
     /// The layer's on-screen text copy, decoded from the text-document EngineData
-    /// blob. Null for non-text layers; "" when the text run is empty. Best-effort:
-    /// see <see cref="EngineData"/> for the heuristic's known limits.
+    /// blob. Null for non-text layers; "" when the text run is empty. Read
+    /// structurally (all runs concatenated) with a heuristic fallback.
     /// </summary>
     public string? SourceText { get; internal set; }
+
+    /// <summary>
+    /// PostScript names of the fonts the text layer's document references, in order
+    /// (e.g. "Heebo-ExtraBold"). Empty for non-text layers or when the EngineData
+    /// could not be parsed structurally. Useful for knowing which fonts a template
+    /// requires before rendering.
+    /// </summary>
+    public IReadOnlyList<string> Fonts { get; internal set; } = Array.Empty<string>();
 
     internal static AepLayer Parse(RifxList layerHead, AepProject project)
     {
@@ -86,10 +94,41 @@ public class AepLayer
         if (rootTDGP.TryGetValue("ADBE Text Properties", out var textTDGP))
         {
             layer.Text = AepProperty.ParseFromList(textTDGP, "ADBE Text Properties");
-            layer.SourceText = ExtractSourceText(layerHead);
+            PopulateTextContent(layer, layerHead);
         }
 
         return layer;
+    }
+
+    /// <summary>
+    /// Decodes the layer's text-document EngineData blob into <see cref="SourceText"/>
+    /// and <see cref="Fonts"/>. The blob is the single anomalous (ANON) block in the
+    /// layer's subtree. Prefers the structural parse; falls back to the heuristic for
+    /// text-only when a blob won't parse.
+    /// </summary>
+    private static void PopulateTextContent(AepLayer layer, RifxList layerHead)
+    {
+        var block = FindEngineDataBlock(layerHead);
+        if (block is null)
+            return;
+
+        var bytes = block.GetBytes();
+        try
+        {
+            var document = EngineTextExtractor.Extract(EngineDataParser.Parse(bytes));
+            if (document is not null)
+            {
+                layer.SourceText = document.Text;
+                layer.Fonts = document.Fonts;
+                return;
+            }
+        }
+        catch (InvalidDataException)
+        {
+            // malformed EngineData — fall through to the tolerant heuristic
+        }
+
+        layer.SourceText = EngineData.ExtractDisplayText(bytes);
     }
 
     /// <summary>
@@ -98,31 +137,6 @@ public class AepLayer
     /// the reader captures it as anomalous because its leading bytes look like a
     /// bogus chunk size. Returns "" if found-but-empty, null if not found.
     /// </summary>
-    private static string? ExtractSourceText(RifxList layerHead)
-    {
-        var block = FindEngineDataBlock(layerHead);
-        if (block is null)
-            return null;
-
-        var bytes = block.GetBytes();
-
-        // Prefer the structural parse: it reads the run text by key path, which
-        // concatenates multi-run text correctly and keeps CJK copy. Fall back to the
-        // heuristic only if the blob doesn't parse into a text document.
-        try
-        {
-            var document = EngineTextExtractor.Extract(EngineDataParser.Parse(bytes));
-            if (document is not null)
-                return document.Text;
-        }
-        catch (InvalidDataException)
-        {
-            // malformed EngineData — fall through to the tolerant heuristic
-        }
-
-        return EngineData.ExtractDisplayText(bytes);
-    }
-
     private static RifxBlock? FindEngineDataBlock(RifxList list)
     {
         foreach (var block in list.Blocks)

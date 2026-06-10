@@ -7,6 +7,9 @@ internal sealed class EngineTextDocument
 
     /// <summary>All runs joined and trimmed of trailing line breaks/whitespace.</summary>
     public string Text { get; init; } = "";
+
+    /// <summary>PostScript names of every font in the document's font set, in order.</summary>
+    public IReadOnlyList<string> Fonts { get; init; } = Array.Empty<string>();
 }
 
 /// <summary>
@@ -38,6 +41,32 @@ internal static class EngineTextExtractor
         {
             Runs = runs,
             Text = string.Concat(runs).TrimEnd('\r', '\n', ' ', '\t'),
+            Fonts = ExtractFonts(top),
         };
+    }
+
+    /// <summary>
+    /// Font set lives in the resource dict: /0 -> /1 -> /0 is an array of font entries,
+    /// each entry's /0/0/0 being the PostScript name string.
+    /// </summary>
+    private static IReadOnlyList<string> ExtractFonts(EngineDict top)
+    {
+        if (top.Get("0") is not EngineDict resource
+            || resource.Get("1") is not EngineDict fontSet
+            || fontSet.Get("0") is not EngineArray entries)
+            return Array.Empty<string>();
+
+        var fonts = new List<string>();
+        foreach (var entry in entries.Items)
+        {
+            if (entry is EngineDict e
+                && e.Get("0") is EngineDict a
+                && a.Get("0") is EngineDict b
+                && b.Get("0") is EngineString name)
+            {
+                fonts.Add(name.Value);
+            }
+        }
+        return fonts;
     }
 }

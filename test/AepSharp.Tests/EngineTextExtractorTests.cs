@@ -42,6 +42,44 @@ public class EngineTextExtractorTests
         return parts.ToArray();
     }
 
+    // A font-set entry: << /0 << /0 << /0 (name) >> >> >>
+    private static object[] Font(string name) =>
+        new object[] { " << /0 << /0 << /0 ", Str(name), " >> >> >> " };
+
+    // The resource dict: /0 << /1 << /0 [ <font entries> ] >> >>
+    private static object[] Resource(params object[][] fonts)
+    {
+        var parts = new List<object> { "/0 << /1 << /0 [ " };
+        foreach (var f in fonts) parts.AddRange(f);
+        parts.Add(" ] >> >> ");
+        return parts.ToArray();
+    }
+
+    private static object[] Concat(params object[][] groups)
+    {
+        var parts = new List<object>();
+        foreach (var g in groups) parts.AddRange(g);
+        return parts.ToArray();
+    }
+
+    [Fact]
+    public void ExtractsTheFontSet()
+    {
+        var doc = Extract(Concat(
+            Resource(Font("Heebo-ExtraBold"), Font("Myriad-Roman"), Font("AdobeInvisFont")),
+            Doc(Run("Hi"))));
+
+        Assert.Equal(new[] { "Heebo-ExtraBold", "Myriad-Roman", "AdobeInvisFont" }, doc!.Fonts);
+        Assert.Equal("Hi", doc.Text);
+    }
+
+    [Fact]
+    public void FontsAreEmptyWhenNoResourceDict()
+    {
+        var doc = Extract(Doc(Run("Hi")));
+        Assert.Empty(doc!.Fonts);
+    }
+
     [Fact]
     public void ExtractsASingleRun()
     {

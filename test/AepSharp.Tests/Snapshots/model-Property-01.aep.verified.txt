@@ -189,7 +189,12 @@
                 }
               ]
             },
-            SourceText: Text Layer
+            SourceText: Text Layer,
+            Fonts: [
+              BritannicBold,
+              Myriad-Roman,
+              AdobeInvisFont
+            ]
           }
         ]
       },
