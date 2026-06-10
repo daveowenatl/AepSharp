@@ -49,15 +49,15 @@ internal static class EngineTextExtractor
     public static EngineTextDocument? Extract(EngineValue root)
     {
         if (root is not EngineDict top) return null;
-        if (top.Get("1") is not EngineDict document) return null;
-        if (document.Get("1") is not EngineArray runArray) return null;
+        if (top.Get(EngineDataSchema.Document) is not EngineDict document) return null;
+        if (document.Get(EngineDataSchema.RunArray) is not EngineArray runArray) return null;
 
         var runs = new List<string>();
         foreach (var item in runArray.Items)
         {
             if (item is EngineDict run
-                && run.Get("0") is EngineDict inner
-                && inner.Get("0") is EngineString text)
+                && run.Get(EngineDataSchema.Entry) is EngineDict inner
+                && inner.Get(EngineDataSchema.Entry) is EngineString text)
             {
                 runs.Add(text.Value);
             }
@@ -82,10 +82,10 @@ internal static class EngineTextExtractor
         var result = new List<EngineStyledRun>();
         foreach (var item in runArray.Items)
         {
-            if (item is not EngineDict run || run.Get("0") is not EngineDict inner)
+            if (item is not EngineDict run || run.Get(EngineDataSchema.Entry) is not EngineDict inner)
                 continue;
-            var text = (inner.Get("0") as EngineString)?.Value ?? "";
-            if (inner.Get("6") is not EngineDict styleRun || styleRun.Get("0") is not EngineArray spans)
+            var text = (inner.Get(EngineDataSchema.Entry) as EngineString)?.Value ?? "";
+            if (inner.Get(EngineDataSchema.StyleRun) is not EngineDict styleRun || styleRun.Get(EngineDataSchema.Entry) is not EngineArray spans)
                 continue;
 
             var pos = 0;
@@ -96,24 +96,24 @@ internal static class EngineTextExtractor
                 // A corrupt blob can carry a negative or out-of-int-range span length;
                 // clamp to [0, remaining] so the cursor never rewinds (which would
                 // duplicate text into later runs) and never overflows.
-                var rawLen = (span.Get("1") as EngineNumber)?.Value ?? 0;
+                var rawLen = (span.Get(EngineDataSchema.SpanLength) as EngineNumber)?.Value ?? 0;
                 var len = double.IsNaN(rawLen)
                     ? 0
                     : (int)Math.Clamp(rawLen, 0, text.Length - pos);
                 var slice = Slice(text, pos, len);
                 pos += len;
 
-                var style = (span.Get("0") as EngineDict)?.Get("0") is EngineDict inner2
-                    ? inner2.Get("6") as EngineDict
+                var style = (span.Get(EngineDataSchema.Entry) as EngineDict)?.Get(EngineDataSchema.Entry) is EngineDict inner2
+                    ? inner2.Get(EngineDataSchema.StyleRun) as EngineDict
                     : null;
 
                 result.Add(new EngineStyledRun
                 {
                     Text = slice.TrimEnd('\r', '\n'),
-                    FontIndex = style?.Get("0") is EngineNumber fi ? (int)fi.Value : null,
-                    FontSize = (style?.Get("1") as EngineNumber)?.Value,
-                    Fill = style is null ? null : Color(style, "53"),
-                    Stroke = style is null ? null : Color(style, "54"),
+                    FontIndex = style?.Get(EngineDataSchema.FontIndex) is EngineNumber fi ? (int)fi.Value : null,
+                    FontSize = (style?.Get(EngineDataSchema.FontSize) as EngineNumber)?.Value,
+                    Fill = style is null ? null : Color(style, EngineDataSchema.FillColor),
+                    Stroke = style is null ? null : Color(style, EngineDataSchema.StrokeColor),
                 });
             }
         }
@@ -134,8 +134,8 @@ internal static class EngineTextExtractor
     private static IReadOnlyList<double>? Color(EngineDict style, string key)
     {
         if (style.Get(key) is not EngineDict colour
-            || colour.Get("0") is not EngineDict colour0
-            || colour0.Get("1") is not EngineArray arr)
+            || colour.Get(EngineDataSchema.Entry) is not EngineDict colour0
+            || colour0.Get(EngineDataSchema.ColorValue) is not EngineArray arr)
             return null;
 
         var nums = arr.Items.OfType<EngineNumber>().Select(n => n.Value).ToList();
@@ -150,18 +150,18 @@ internal static class EngineTextExtractor
     /// </summary>
     private static IReadOnlyList<string> ExtractFonts(EngineDict top)
     {
-        if (top.Get("0") is not EngineDict resource
-            || resource.Get("1") is not EngineDict fontSet
-            || fontSet.Get("0") is not EngineArray entries)
+        if (top.Get(EngineDataSchema.ResourceDict) is not EngineDict resource
+            || resource.Get(EngineDataSchema.FontSet) is not EngineDict fontSet
+            || fontSet.Get(EngineDataSchema.Entry) is not EngineArray entries)
             return Array.Empty<string>();
 
         var fonts = new List<string>();
         foreach (var entry in entries.Items)
         {
             if (entry is EngineDict e
-                && e.Get("0") is EngineDict a
-                && a.Get("0") is EngineDict b
-                && b.Get("0") is EngineString name)
+                && e.Get(EngineDataSchema.Entry) is EngineDict a
+                && a.Get(EngineDataSchema.Entry) is EngineDict b
+                && b.Get(EngineDataSchema.Entry) is EngineString name)
             {
                 fonts.Add(name.Value);
             }

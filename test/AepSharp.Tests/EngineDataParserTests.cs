@@ -146,6 +146,23 @@ public class EngineDataParserTests
     }
 
     [Fact]
+    public void UnterminatedStringThrowsInvalidDataException()
+    {
+        // A blob truncated mid-string must not silently yield a shortened value —
+        // at top level the document would otherwise "parse" with corrupt text.
+        Assert.Throws<InvalidDataException>(() => Parse("/0 (abc"));
+    }
+
+    [Fact]
+    public void EscapeAtEndOfDataThrowsInvalidDataException()
+    {
+        // A trailing backslash means the escaped byte (and the closing paren) were
+        // cut off; the old behavior silently dropped the byte and mis-aligned the
+        // remaining UTF-16 pairs.
+        Assert.Throws<InvalidDataException>(() => Parse("/0 (ab\\"));
+    }
+
+    [Fact]
     public void ParsesAnArrayOfRunDicts()
     {
         // Mimics the run array: /1 [ << /0 << /0 (text) >> >> ]

@@ -22,13 +22,6 @@ internal sealed class EngineDict : EngineValue
                 return entry.Value;
         return null;
     }
-
-    public bool TryGet(string key, out EngineValue value)
-    {
-        var found = Get(key);
-        value = found!;
-        return found is not null;
-    }
 }
 
 internal sealed class EngineArray : EngineValue

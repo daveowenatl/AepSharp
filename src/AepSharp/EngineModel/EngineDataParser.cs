@@ -16,11 +16,14 @@ namespace AepSharp.EngineModel;
 /// </summary>
 internal static class EngineDataParser
 {
-    public static EngineValue Parse(ReadOnlySpan<byte> data)
+    /// <summary>Parses without copying — callers that already hold a byte[] use this.</summary>
+    public static EngineValue Parse(byte[] data)
     {
-        var parser = new Parser(data.ToArray());
+        var parser = new Parser(data);
         return parser.ParseDocument();
     }
+
+    public static EngineValue Parse(ReadOnlySpan<byte> data) => Parse(data.ToArray());
 
     private sealed class Parser(byte[] data)
     {
@@ -103,28 +106,11 @@ internal static class EngineDataParser
 
         private EngineString ParseString()
         {
-            Expect((byte)'(');
-            var raw = new List<byte>();
-            while (_pos < data.Length)
-            {
-                var c = data[_pos];
-                if (c == (byte)'\\')
-                {
-                    if (_pos + 1 < data.Length)
-                        raw.Add(data[_pos + 1]);
-                    _pos += 2;
-                    continue;
-                }
-                if (c == (byte)')')
-                {
-                    _pos++;
-                    break;
-                }
-                raw.Add(c);
-                _pos++;
-            }
+            var bytes = ParenString.ReadRaw(data, _pos, out var next, out var terminated);
+            if (!terminated)
+                throw new InvalidDataException($"Unterminated string starting at offset {_pos}");
+            _pos = next;
 
-            var bytes = raw.ToArray();
             string value;
             if (bytes.Length >= 2 && bytes[0] == 0xFE && bytes[1] == 0xFF)
                 value = Encoding.BigEndianUnicode.GetString(bytes, 2, bytes.Length - 2);

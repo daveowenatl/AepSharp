@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using AepSharp.EngineModel;
 
 namespace AepSharp;
 
@@ -61,7 +62,9 @@ internal static class EngineData
                 continue;
             }
 
-            var raw = ReadParenString(data, i, out var next);
+            // Tolerant by design: an unterminated string still yields its bytes —
+            // this is the last-resort scanner over arbitrary data.
+            var raw = ParenString.ReadRaw(data, i, out var next, out _);
             i = next;
 
             // Require the UTF-16 BOM; everything we care about is UTF-16BE.
@@ -78,36 +81,6 @@ internal static class EngineData
         }
 
         return lastDisplay ?? "";
-    }
-
-    /// <summary>
-    /// Reads the raw bytes of a parenthesized string starting at <paramref name="open"/>
-    /// (the '(' index), honoring backslash byte-escapes. <paramref name="next"/> is set
-    /// to the index just past the closing ')'.
-    /// </summary>
-    private static byte[] ReadParenString(ReadOnlySpan<byte> data, int open, out int next)
-    {
-        var raw = new List<byte>();
-        var j = open + 1;
-        while (j < data.Length)
-        {
-            var c = data[j];
-            if (c == (byte)'\\')
-            {
-                // Escape: the next byte is literal (this also re-aligns UTF-16
-                // pairs when Adobe escapes a '(' ')' or '\\' inside the stream).
-                if (j + 1 < data.Length)
-                    raw.Add(data[j + 1]);
-                j += 2;
-                continue;
-            }
-            if (c == (byte)')')
-                break;
-            raw.Add(c);
-            j++;
-        }
-        next = j + 1;
-        return raw.ToArray();
     }
 
     private static bool IsDisplayCandidate(string text)
