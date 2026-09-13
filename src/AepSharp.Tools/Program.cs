@@ -8,6 +8,7 @@ using Spectre.Console.Cli;
 //   aepdump <file.aep>            pretty project tree (comps, layers, text copy)
 //   aepdump tree <file.aep>       (same, explicit)
 //   aepdump rifx <file.aep>       raw RIFX chunk tree with offsets/sizes
+//   aepdump scene <file.aep>      compositions, layers, timing, transforms and text as JSON
 
 var app = new CommandApp<TreeCommand>();
 app.Configure(config =>
@@ -15,6 +16,8 @@ app.Configure(config =>
     config.SetApplicationName("aepdump");
     config.AddCommand<TreeCommand>("tree")
         .WithDescription("Print the parsed project model (comps, layers, text copy) as a tree.");
+    config.AddCommand<SceneCommand>("scene")
+        .WithDescription("Print compositions, layers, timing, transforms and text as JSON (for renderers and tooling).");
     config.AddCommand<RifxCommand>("rifx")
         .WithDescription("Print the raw RIFX chunk tree with absolute offsets and sizes.");
 });
@@ -191,5 +194,108 @@ internal sealed class RifxCommand : Command<RifxSettings>
         Console.Out.Write(output);
         Console.Out.Write('\n');
         return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+internal sealed class SceneSettings : CommandSettings
+{
+    [CommandArgument(0, "<file>")]
+    [Description("Path to the .aep file")]
+    public string File { get; init; } = "";
+}
+
+/// <summary>
+/// Emits a renderer-oriented JSON view of the project: every composition with its
+/// layers' timing (composition time), static transform values, animated
+/// properties, source item and text runs. Transform values absent from the output
+/// are at their After Effects defaults.
+/// </summary>
+internal sealed class SceneCommand : Command<SceneSettings>
+{
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+    };
+
+    protected override int Execute(CommandContext context, SceneSettings settings, CancellationToken cancellation)
+    {
+        if (!System.IO.File.Exists(settings.File))
+            return Error($"file not found: {settings.File}");
+
+        AepProject project;
+        try
+        {
+            project = AepProject.Open(settings.File);
+        }
+        catch (Exception ex) when (ex is InvalidDataException or EndOfStreamException)
+        {
+            return Error($"not a readable .aep file: {ex.Message}");
+        }
+
+        var compositions = project.Items.Values
+            .Where(i => i.ItemType == ItemType.Composition)
+            .Select(c => new
+            {
+                c.Id,
+                c.Name,
+                c.Width,
+                c.Height,
+                c.Framerate,
+                Duration = c.DurationSeconds,
+                Layers = c.CompositionLayers.Select(l => Layer(project, l)).ToList(),
+            })
+            .ToList();
+
+        var footage = project.Items.Values
+            .Where(i => i.ItemType == ItemType.Footage)
+            .Select(f => new { f.Id, f.Name, f.Width, f.Height, Type = f.FootageType.ToString(), Duration = f.DurationSeconds })
+            .ToList();
+
+        Console.Out.Write(System.Text.Json.JsonSerializer.Serialize(new { File = Path.GetFileName(settings.File), Compositions = compositions, Footage = footage }, JsonOptions));
+        Console.Out.Write('\n');
+        return 0;
+    }
+
+    private static object Layer(AepProject project, AepLayer layer)
+    {
+        var source = layer.SourceId != 0 && project.Items.TryGetValue(layer.SourceId, out var item) ? item : null;
+        return new
+        {
+            layer.Index,
+            layer.Name,
+            Source = source is null ? null : new { source.Id, source.Name, Kind = source.ItemType.ToString() },
+            Visible = layer.VideoEnabled,
+            Audible = layer.AudioEnabled,
+            layer.GuideEnabled,
+            In = layer.CompositionInPoint,
+            Out = layer.CompositionOutPoint,
+            layer.StartTime,
+            Transform = new
+            {
+                Anchor = layer.AnchorPoint,
+                layer.Position,
+                layer.Scale,
+                layer.Rotation,
+                layer.Opacity,
+            },
+            Animated = layer.Transform?.Properties.Where(p => p.IsAnimated)
+                .Select(p => new { p.MatchName, Keyframes = p.KeyframeCount }).ToList() is { Count: > 0 } animated ? animated : null,
+            Effects = layer.Effects.Count > 0 ? layer.Effects.Select(e => e.MatchName).ToList() : null,
+            Text = layer.SourceText is null ? null : new
+            {
+                Content = layer.SourceText,
+                Runs = layer.TextRuns.Select(r => new { r.Text, Font = r.FontName, Size = r.FontSize, Fill = r.FillColor, Stroke = r.StrokeColor }).ToList(),
+            },
+        };
+    }
+
+    private static int Error(string message)
+    {
+        ErrorConsole.Instance.MarkupLineInterpolated($"[red]aepdump:[/] {message}");
+        return 1;
     }
 }
