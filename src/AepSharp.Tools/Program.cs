@@ -8,7 +8,8 @@ using Spectre.Console.Cli;
 //   aepdump <file.aep>            pretty project tree (comps, layers, text copy)
 //   aepdump tree <file.aep>       (same, explicit)
 //   aepdump rifx <file.aep>       raw RIFX chunk tree with offsets/sizes
-//   aepdump scene <file.aep>      compositions, layers, timing, transforms and text as JSON
+//   aepdump scene <file.aep>      compositions, layers, timing, transforms, keyframes and text as JSON
+//                  [--bake]         plus per-frame values of animated transform properties
 
 var app = new CommandApp<TreeCommand>();
 app.Configure(config =>
@@ -204,6 +205,10 @@ internal sealed class SceneSettings : CommandSettings
     [CommandArgument(0, "<file>")]
     [Description("Path to the .aep file")]
     public string File { get; init; } = "";
+
+    [CommandOption("--bake")]
+    [Description("Also emit per-frame values for animated transform properties over each layer's visible range")]
+    public bool Bake { get; init; }
 }
 
 /// <summary>
@@ -246,7 +251,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
                 c.Height,
                 c.Framerate,
                 Duration = c.DurationSeconds,
-                Layers = c.CompositionLayers.Select(l => Layer(project, l)).ToList(),
+                Layers = c.CompositionLayers.Select(l => Layer(project, c, l, settings.Bake)).ToList(),
             })
             .ToList();
 
@@ -260,7 +265,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
         return 0;
     }
 
-    private static object Layer(AepProject project, AepLayer layer)
+    private static object Layer(AepProject project, AepItem composition, AepLayer layer, bool bake)
     {
         var source = layer.SourceId != 0 && project.Items.TryGetValue(layer.SourceId, out var item) ? item : null;
         return new
@@ -283,13 +288,50 @@ internal sealed class SceneCommand : Command<SceneSettings>
                 layer.Opacity,
             },
             Animated = layer.Transform?.Properties.Where(p => p.IsAnimated)
-                .Select(p => new { p.MatchName, Keyframes = p.KeyframeCount }).ToList() is { Count: > 0 } animated ? animated : null,
+                .Select(p => Animated(composition, layer, p, bake)).ToList() is { Count: > 0 } animated ? animated : null,
             Effects = layer.Effects.Count > 0 ? layer.Effects.Select(e => e.MatchName).ToList() : null,
             Text = layer.SourceText is null ? null : new
             {
                 Content = layer.SourceText,
                 Runs = layer.TextRuns.Select(r => new { r.Text, Font = r.FontName, Size = r.FontSize, Fill = r.FillColor, Stroke = r.StrokeColor }).ToList(),
             },
+        };
+    }
+
+    // Keyframe times are emitted in composition time. Baked values sample the
+    // pre-expression value at each composition frame the layer is visible.
+    private static object Animated(AepItem composition, AepLayer layer, AepProperty property, bool bake)
+    {
+        List<object>? frames = null;
+        if (bake && composition.Framerate > 0)
+        {
+            frames = new List<object>();
+            var first = Math.Max(0, (int)Math.Ceiling(layer.CompositionInPoint * composition.Framerate - 1e-6));
+            var last = (int)Math.Floor(Math.Min(layer.CompositionOutPoint, composition.DurationSeconds) * composition.Framerate - 1e-6);
+            for (var frame = first; frame <= last; frame++)
+                frames.Add(new { Frame = frame, Value = property.ValueAtTime(frame / composition.Framerate - layer.StartTime) });
+        }
+
+        return new
+        {
+            property.MatchName,
+            property.IsSpatial,
+            Expression = property.ExpressionEnabled ? property.Expression : null,
+            Keyframes = property.Keyframes.Select(k => new
+            {
+                Time = k.Time + layer.StartTime,
+                k.Value,
+                In = k.InInterpolation.ToString(),
+                Out = k.OutInterpolation.ToString(),
+                InEase = k.InEase.Select(e => new { e.Speed, e.Influence }),
+                OutEase = k.OutEase.Select(e => new { e.Speed, e.Influence }),
+                k.InSpatialTangent,
+                k.OutSpatialTangent,
+                TemporalAutoBezier = k.TemporalAutoBezier ? true : (bool?)null,
+                SpatialAutoBezier = k.SpatialAutoBezier ? true : (bool?)null,
+                Roving = k.Roving ? true : (bool?)null,
+            }).ToList(),
+            Frames = frames,
         };
     }
 
