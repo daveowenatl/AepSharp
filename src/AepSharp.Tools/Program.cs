@@ -316,6 +316,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
                 BoxSize = layer.TextBoxSize,
                 BoxPosition = layer.TextBoxPosition,
                 Runs = layer.TextRuns.Select(r => new { r.Text, Font = r.FontName, Size = r.FontSize, Fill = r.FillColor, Stroke = r.StrokeColor, r.Tracking, r.Leading }).ToList(),
+                Animators = TextAnimators(layer) is { Count: > 0 } animators ? animators : null,
             },
         };
     }
@@ -336,6 +337,22 @@ internal sealed class SceneCommand : Command<SceneSettings>
             Animated = p.IsAnimated ? Animated(composition, layer, p, bake) : null,
         }).ToList(),
     };
+
+    // Text animators as stored: only the properties added to each animator are in the
+    // file, so an animator whose properties sit at their defaults (or are driven by a
+    // no-op expression) changes nothing.
+    private static List<object> TextAnimators(AepLayer layer)
+    {
+        var group = layer.Text?.Properties.FirstOrDefault(p => p.MatchName == "ADBE Text Animators");
+        return group?.Properties.Select(animator => (object)new
+        {
+            animator.Name,
+            Selectors = animator.Properties.FirstOrDefault(p => p.MatchName == "ADBE Text Selectors")?.Properties.Count ?? 0,
+            Properties = animator.Properties.FirstOrDefault(p => p.MatchName == "ADBE Text Animator Properties")?.Properties
+                .Select(p => new { p.MatchName, p.Value, Animated = p.IsAnimated ? true : (bool?)null, Expression = p.Expression is null ? null : (bool?)p.ExpressionEnabled })
+                .ToList(),
+        }).ToList() ?? new List<object>();
+    }
 
     // Every expression on the layer's transform, effect and text properties, with a
     // path of match names (e.g. "ADBE Transform Group/ADBE Opacity").
