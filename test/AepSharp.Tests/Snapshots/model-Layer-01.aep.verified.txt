@@ -55,7 +55,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -69,7 +70,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -79,7 +81,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -93,7 +96,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -107,7 +111,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -121,12 +126,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -165,7 +172,8 @@
                     PropertyType: 12,
                     IsAnimated: false,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    Enabled: true
                   },
                   {
                     MatchName: ADBE Fill-0007,
@@ -179,7 +187,8 @@
                     IsAnimated: false,
                     Dimensions: 1,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    Enabled: true
                   },
                   {
                     MatchName: ADBE Fill-0002,
@@ -196,7 +205,8 @@
                     IsAnimated: false,
                     Dimensions: 4,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    Enabled: true
                   },
                   {
                     MatchName: ADBE Fill-0006,
@@ -210,7 +220,8 @@
                     IsAnimated: false,
                     Dimensions: 1,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    Enabled: true
                   },
                   {
                     MatchName: ADBE Fill-0003,
@@ -224,7 +235,8 @@
                     IsAnimated: false,
                     Dimensions: 1,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    Enabled: true
                   },
                   {
                     MatchName: ADBE Fill-0004,
@@ -238,7 +250,8 @@
                     IsAnimated: false,
                     Dimensions: 1,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    Enabled: true
                   },
                   {
                     MatchName: ADBE Fill-0005,
@@ -252,12 +265,14 @@
                     IsAnimated: false,
                     Dimensions: 1,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    Enabled: true
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
-                ExpressionEnabled: false
+                ExpressionEnabled: false,
+                Enabled: true
               }
             ],
             OutPoint: 60.0,
@@ -284,7 +299,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -298,7 +314,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -308,7 +325,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -322,7 +340,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -336,7 +355,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -350,12 +370,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -402,7 +424,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -416,7 +439,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -426,7 +450,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -440,7 +465,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -454,7 +480,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -468,12 +495,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -520,7 +549,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -534,7 +564,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -544,7 +575,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -558,7 +590,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -572,7 +605,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -586,12 +620,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -638,7 +674,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -652,7 +689,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -662,7 +700,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -676,7 +715,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -690,7 +730,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -704,12 +745,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -756,7 +799,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -770,7 +814,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -780,7 +825,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -794,7 +840,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -808,7 +855,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -822,12 +870,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -874,7 +924,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -888,7 +939,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Z,
@@ -902,7 +954,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -916,12 +969,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             Rotation: 0.0,
             IsBoxText: false
@@ -969,7 +1024,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -983,7 +1039,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -993,7 +1050,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1007,7 +1065,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1021,7 +1080,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1035,12 +1095,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1087,7 +1149,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1101,7 +1164,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1111,7 +1175,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1125,7 +1190,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1139,7 +1205,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1153,12 +1220,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1206,7 +1275,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1220,7 +1290,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1230,7 +1301,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1244,7 +1316,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1258,7 +1331,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1272,12 +1346,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1324,7 +1400,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1338,7 +1415,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1348,7 +1426,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1362,7 +1441,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1376,7 +1456,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1390,12 +1471,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1441,7 +1524,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1455,7 +1539,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1465,7 +1550,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1479,7 +1565,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1493,7 +1580,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1507,12 +1595,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1559,7 +1649,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1573,7 +1664,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1583,7 +1675,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1597,7 +1690,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1611,7 +1705,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1625,12 +1720,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1677,7 +1774,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1691,7 +1789,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1701,7 +1800,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1715,7 +1815,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1729,7 +1830,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1743,12 +1845,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1795,7 +1899,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1809,7 +1914,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1819,7 +1925,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1833,7 +1940,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1847,7 +1955,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1861,12 +1970,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -1914,7 +2025,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -1928,7 +2040,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -1938,7 +2051,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -1952,7 +2066,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -1966,7 +2081,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -1980,12 +2096,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           },
@@ -2032,7 +2150,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -2046,7 +2165,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -2056,7 +2176,8 @@
                   PropertyType: Custom,
                   IsAnimated: false,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -2070,7 +2191,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -2084,7 +2206,8 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -2098,12 +2221,14 @@
                   IsAnimated: false,
                   Dimensions: 1,
                   IsSpatial: false,
-                  ExpressionEnabled: false
+                  ExpressionEnabled: false,
+                  Enabled: true
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
-              ExpressionEnabled: false
+              ExpressionEnabled: false,
+              Enabled: true
             },
             IsBoxText: false
           }

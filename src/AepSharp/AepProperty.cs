@@ -60,6 +60,12 @@ public class AepProperty
     public bool ExpressionEnabled { get; internal set; }
 
     /// <summary>
+    /// False when the property or group is switched off (e.g. a shape layer's Fill with its
+    /// eye toggled off). Read from bit 0 of byte 3 of the tdsb block, per py-aep's TdsbChunk.
+    /// </summary>
+    public bool Enabled { get; internal set; } = true;
+
+    /// <summary>
     /// For a layer-select effect parameter (e.g. Layer Control): the <see cref="AepLayer.Id"/>
     /// of the referenced layer in the same composition, or null when none is chosen or the
     /// property is not a layer reference. Read from the value's <c>tdpi</c> block.
@@ -86,6 +92,9 @@ public class AepProperty
             MatchName = matchName,
             Name = matchName == "ADBE Effect Parade" ? "Effects" : matchName
         };
+
+        if (propHead.FindByType("tdsb")?.GetBytes() is { Length: >= 4 } flags)
+            prop.Enabled = (flags[3] & 1) != 0;
 
         // Parse sub-properties from tdgp groups. Walk the (match name, list) pairs in
         // order rather than through a name-keyed map: an effect parade can hold several

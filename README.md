@@ -107,12 +107,14 @@ Reads:
 - Expression source and whether it's enabled, including Source Text expressions
 - Effects: names and parameters with their current values or keyframes (including
   repeat instances that share the project's effect definitions), layer references
+- Shape layer contents: the stored property tree (groups, rectangles, ellipses, fills,
+  strokes, transforms, …) with values and each group's enabled switch
 - Text: copy, fonts, styled runs (size, colours, tracking, leading), paragraph
   justification, point vs. box text with box size and position
 
 Doesn't read (yet):
 
-- Masks (only their count), markers, shape layer contents
+- Masks (only their count), markers, shape path vertices (bezier paths)
 - Mask-reference, 3D-point and curve effect parameters (no value)
 - Separated dimensions (`Position_0`/`Position_1`) as a combined value
 - Time stretch when sampling keyframes (`TransformValueAt` assumes 100%)
@@ -136,7 +138,7 @@ dotnet run --project src/AepSharp.Tools -- rifx template.aep --format json
 hex/ascii preview, and a flag if it looks truncated or overflowing. `scene` is meant as
 input for renderers and template tooling: footage with `sourcePath`; layers with
 `type` (text, shape, camera, …), `null`, `threeD`, `adjustment`, `collapseTransform`,
-`timeRemap`, `masks` and `textAnimators` counts, `blendingMode`, `trackMatte`, `stretch`, `motionBlur`, every enabled or disabled
+`timeRemap`, `masks` and `textAnimators` counts, shape `contents` (only non-default properties are stored; values in stored units, colours ARGB 0–255, shape percentages as 0–100), `blendingMode`, `trackMatte`, `stretch`, `motionBlur`, every enabled or disabled
 expression (`property` as a match-name path, `expression`, `enabled`), each effect's `parameters` (`name`, `value`,
 and keyframes/baked frames when animated); text with `justification`, `boxText`,
 `boxSize` and `boxPosition`.

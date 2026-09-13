@@ -34,6 +34,8 @@ public class AepLayer
     public bool VideoEnabled { get; internal set; }
     public List<AepProperty> Effects { get; internal set; } = new();
     public AepProperty? Text { get; internal set; }
+    /// <summary>A shape layer's contents (the "ADBE Root Vectors Group" tree); null for other layers.</summary>
+    public AepProperty? Contents { get; internal set; }
 
     /// <summary>
     /// When the layer starts in its parent composition, in seconds. Layer time zero
@@ -290,6 +292,9 @@ public class AepLayer
         if (rootTDGP.TryGetValue("ADBE Time Remapping", out var timeRemapTDBS))
             layer.TimeRemapEnabled = AepProperty.ParseFromList(timeRemapTDBS, "ADBE Time Remapping").IsAnimated;
 
+        if (rootTDGP.TryGetValue("ADBE Root Vectors Group", out var contentsTDGP))
+            layer.Contents = AepProperty.ParseFromList(contentsTDGP, "ADBE Root Vectors Group");
+
         // Transform
         if (rootTDGP.TryGetValue("ADBE Transform Group", out var transformTDGP))
             layer.Transform = AepProperty.ParseFromList(transformTDGP, "ADBE Transform Group");
@@ -304,7 +309,7 @@ public class AepLayer
 
         if (timeBase != 0)
         {
-            foreach (var root in layer.Effects.Append(layer.Transform).Append(layer.Text))
+            foreach (var root in layer.Effects.Append(layer.Transform).Append(layer.Text).Append(layer.Contents))
                 AssignTimeBase(root, timeBase);
         }
 

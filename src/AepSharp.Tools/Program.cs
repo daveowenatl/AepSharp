@@ -308,6 +308,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
                 .Select(p => Animated(composition, layer, p, bake)).ToList() is { Count: > 0 } animated ? animated : null,
             Effects = layer.Effects.Count > 0 ? layer.Effects.Select(e => Effect(composition, layer, e, bake)).ToList() : null,
             Expressions = Expressions(layer) is { Count: > 0 } expressions ? expressions : null,
+            Contents = layer.Contents is null ? null : ShapeTree(layer.Contents),
             Text = layer.SourceText is null ? null : new
             {
                 Content = layer.SourceText,
@@ -337,6 +338,20 @@ internal sealed class SceneCommand : Command<SceneSettings>
             Animated = p.IsAnimated ? Animated(composition, layer, p, bake) : null,
         }).ToList(),
     };
+
+    // A shape layer's contents as stored: groups with their children, leaf properties with
+    // their static value (stored units: percentages as fractions), animated and expression
+    // flags, and the enabled switch when it's off.
+    private static List<object> ShapeTree(AepProperty group) =>
+        group.Properties.Select(p => (object)new
+        {
+            p.MatchName,
+            Enabled = p.Enabled ? (bool?)null : false,
+            Value = p.Properties.Count == 0 ? p.Value : null,
+            Animated = p.IsAnimated ? true : (bool?)null,
+            Expression = p.Expression is null ? null : (bool?)p.ExpressionEnabled,
+            Children = p.Properties.Count > 0 ? ShapeTree(p) : null,
+        }).ToList();
 
     // Text animators as stored: only the properties added to each animator are in the
     // file, so an animator whose properties sit at their defaults (or are driven by a
@@ -373,6 +388,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
         foreach (var effect in layer.Effects)
             Walk(effect, "ADBE Effect Parade");
         Walk(layer.Text, "");
+        Walk(layer.Contents, "");
         return found;
     }
 
