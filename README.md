@@ -101,6 +101,8 @@ Reads:
 - Footage: dimensions, frame rate, duration, solid colour, type (image, audio/video, vector,
   Photoshop, solid, placeholder), source file path
 - Layers: type (AV, text, shape, camera, light), null, flags, quality, sampling and frame-blend modes, source, parent,
+  the unclamped out point (`UnclampedCompositionOutPoint`, what After Effects would use if the source
+  became longer; derived from its clamp rule, not yet confirmed against a production render),
   start/in/out times, time stretch, blending mode, track matte and matte layer
 - Transform values (anchor point, position, scale, rotation, opacity)
 - Keyframes for numeric properties, with After Effects-style interpolation
