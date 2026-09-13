@@ -23,6 +23,16 @@ public class AepProperty
     /// </summary>
     public IReadOnlyList<double>? Value { get; internal set; }
 
+    /// <summary>
+    /// Number of keyframes on the property, read from the keyframe list header
+    /// (lhd3). Zero for static properties and groups. A property can carry a
+    /// single keyframe, which After Effects still treats as animated.
+    /// </summary>
+    public int KeyframeCount { get; internal set; }
+
+    /// <summary>True when the property has keyframes (its value varies over time).</summary>
+    public bool IsAnimated => KeyframeCount > 0;
+
     internal static AepProperty ParseFromList(RifxList propHead, string matchName)
     {
         var prop = new AepProperty
@@ -49,7 +59,10 @@ public class AepProperty
         // big-endian doubles — the first <components> of them; the rest are
         // reserved slots. Animated properties carry keyframes instead of cdat.
         if (propHead.Identifier == "tdbs")
+        {
             prop.Value = DecodeStaticValue(propHead);
+            prop.KeyframeCount = DecodeKeyframeCount(propHead);
+        }
 
         // Handle effect sub-properties (sspc identifier)
         if (propHead.Identifier == "sspc")
@@ -108,6 +121,16 @@ public class AepProperty
         for (var i = 0; i < count; i++)
             value[i] = BinaryPrimitives.ReadDoubleBigEndian(cdat.AsSpan(i * 8));
         return value;
+    }
+
+    // Animated properties carry a "list" LIST whose lhd3 header holds the keyframe
+    // count as a big-endian u16 at offset 10.
+    private static int DecodeKeyframeCount(RifxList tdbs)
+    {
+        var lhd3 = tdbs.SublistFind("list")?.FindByType("lhd3")?.GetBytes();
+        if (lhd3 is null || lhd3.Length < 12)
+            return 0;
+        return BinaryPrimitives.ReadUInt16BigEndian(lhd3.AsSpan(10));
     }
 
     internal static AepProperty ParseFromBlocks(List<object> entries, string matchName)

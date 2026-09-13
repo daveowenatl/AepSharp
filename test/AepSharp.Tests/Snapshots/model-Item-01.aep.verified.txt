@@ -33,7 +33,81 @@
                 MotionBlurEnabled: false,
                 EffectsEnabled: true,
                 AudioEnabled: true,
-                VideoEnabled: true
+                VideoEnabled: true,
+                OutPoint: 31.0,
+                CompositionOutPoint: 31.0,
+                Transform: {
+                  MatchName: ADBE Transform Group,
+                  Name: ADBE Transform Group,
+                  Label: ,
+                  PropertyType: Custom,
+                  Properties: [
+                    {
+                      MatchName: ADBE Position_0,
+                      Name: ADBE Position_0,
+                      Label: ,
+                      Index: 1,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Position_1,
+                      Name: ADBE Position_1,
+                      Label: ,
+                      Index: 2,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Orientation,
+                      Name: ADBE Orientation,
+                      Label: ,
+                      Index: 3,
+                      PropertyType: Custom,
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Rotate X,
+                      Name: ADBE Rotate X,
+                      Label: ,
+                      Index: 4,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Rotate Y,
+                      Name: ADBE Rotate Y,
+                      Label: ,
+                      Index: 5,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Envir Appear in Reflect,
+                      Name: ADBE Envir Appear in Reflect,
+                      Label: ,
+                      Index: 6,
+                      PropertyType: Custom,
+                      Value: [
+                        1.0
+                      ],
+                      IsAnimated: false
+                    }
+                  ],
+                  IsAnimated: false
+                }
               },
               {
                 Index: 2,
@@ -50,7 +124,81 @@
                 MotionBlurEnabled: false,
                 EffectsEnabled: true,
                 AudioEnabled: true,
-                VideoEnabled: true
+                VideoEnabled: true,
+                OutPoint: 31.0,
+                CompositionOutPoint: 31.0,
+                Transform: {
+                  MatchName: ADBE Transform Group,
+                  Name: ADBE Transform Group,
+                  Label: ,
+                  PropertyType: Custom,
+                  Properties: [
+                    {
+                      MatchName: ADBE Position_0,
+                      Name: ADBE Position_0,
+                      Label: ,
+                      Index: 1,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Position_1,
+                      Name: ADBE Position_1,
+                      Label: ,
+                      Index: 2,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Orientation,
+                      Name: ADBE Orientation,
+                      Label: ,
+                      Index: 3,
+                      PropertyType: Custom,
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Rotate X,
+                      Name: ADBE Rotate X,
+                      Label: ,
+                      Index: 4,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Rotate Y,
+                      Name: ADBE Rotate Y,
+                      Label: ,
+                      Index: 5,
+                      PropertyType: Custom,
+                      Value: [
+                        0.0
+                      ],
+                      IsAnimated: false
+                    },
+                    {
+                      MatchName: ADBE Envir Appear in Reflect,
+                      Name: ADBE Envir Appear in Reflect,
+                      Label: ,
+                      Index: 6,
+                      PropertyType: Custom,
+                      Value: [
+                        1.0
+                      ],
+                      IsAnimated: false
+                    }
+                  ],
+                  IsAnimated: false
+                }
               }
             ]
           }
