@@ -325,11 +325,12 @@ internal sealed class SceneCommand : Command<SceneSettings>
 
     // Effect parameter values are emitted as stored: sliders and angles as numbers,
     // checkboxes 0/1, popups as 1-based indices, colours ARGB 0-255, points as fractions
-    // of the layer size. Layer references carry the referenced layer's id.
+    // of the layer size. Layer references carry the referenced layer's id. The name is
+    // the one expressions address the effect by: the user's rename when there is one.
     private static object Effect(AepItem composition, AepLayer layer, AepProperty effect, bool bake) => new
     {
         effect.MatchName,
-        effect.Name,
+        Name = string.IsNullOrEmpty(effect.Label) ? effect.Name : effect.Label,
         Parameters = effect.Properties.Select(p => new
         {
             p.Name,
@@ -371,25 +372,27 @@ internal sealed class SceneCommand : Command<SceneSettings>
     }
 
     // Every expression on the layer's transform, effect and text properties, with a
-    // path of match names (e.g. "ADBE Transform Group/ADBE Opacity").
+    // path of match names (e.g. "ADBE Transform Group/ADBE Opacity"). Expressions on
+    // effect parameters also carry the effect's 1-based index, since a layer can hold
+    // several effects of the same type.
     private static List<object> Expressions(AepLayer layer)
     {
         var found = new List<object>();
-        void Walk(AepProperty? property, string path)
+        void Walk(AepProperty? property, string path, int? effectIndex)
         {
             if (property is null)
                 return;
             var here = path.Length == 0 ? property.MatchName : $"{path}/{property.MatchName}";
             if (property.Expression is { } expression)
-                found.Add(new { Property = here, Expression = expression, Enabled = property.ExpressionEnabled });
+                found.Add(new { Property = here, Expression = expression, Enabled = property.ExpressionEnabled, Effect = effectIndex });
             foreach (var child in property.Properties)
-                Walk(child, here);
+                Walk(child, here, effectIndex);
         }
-        Walk(layer.Transform, "");
-        foreach (var effect in layer.Effects)
-            Walk(effect, "ADBE Effect Parade");
-        Walk(layer.Text, "");
-        Walk(layer.Contents, "");
+        Walk(layer.Transform, "", null);
+        for (var i = 0; i < layer.Effects.Count; i++)
+            Walk(layer.Effects[i], "ADBE Effect Parade", i + 1);
+        Walk(layer.Text, "", null);
+        Walk(layer.Contents, "", null);
         return found;
     }
 
