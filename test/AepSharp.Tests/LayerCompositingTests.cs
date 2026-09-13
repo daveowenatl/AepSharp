@@ -19,6 +19,8 @@ public class LayerCompositingTests
         int StretchDividend = 1,
         uint StretchDivisor = 1,
         uint Parent = 0,
+        byte Type = 0,
+        byte Flags1 = 0,
         uint? MatteLayer = null,
         int Length = 164,
         double Start = 0,
@@ -33,12 +35,14 @@ public class LayerCompositingTests
         WriteTime(ldta, 12, d.Start);
         WriteTime(ldta, 20, d.In);
         WriteTime(ldta, 28, d.Out);
+        ldta[38] = d.Flags1;
         if (d.Length >= 164)
         {
             ldta[99] = d.Blend;
             ldta[103] = d.Transfer;
             ldta[107] = d.Matte;
             BinaryPrimitives.WriteUInt32BigEndian(ldta.AsSpan(108), d.StretchDivisor);
+            ldta[131] = d.Type;
             BinaryPrimitives.WriteUInt32BigEndian(ldta.AsSpan(132), d.Parent);
             BinaryPrimitives.WriteUInt32BigEndian(ldta.AsSpan(160), d.MatteLayer ?? 0);
         }
@@ -99,6 +103,30 @@ public class LayerCompositingTests
         Assert.Equal(14345u, layer.Id);
         Assert.Equal(14300u, layer.ParentLayerId);
         Assert.Equal(14346u, layer.TrackMatteLayerId);
+    }
+
+    [Theory]
+    [InlineData(0, LayerType.AudioVideo)]
+    [InlineData(2, LayerType.Camera)]
+    [InlineData(3, LayerType.Text)]
+    [InlineData(4, LayerType.Shape)]
+    public void DecodesLayerType(byte raw, LayerType expected)
+    {
+        Assert.Equal(expected, Parse(new Ldta(Type: raw)).LayerType);
+    }
+
+    [Fact]
+    public void LdtaWithoutTheTypeByteHasNoLayerType()
+    {
+        Assert.Null(Parse(new Ldta(Length: 120)).LayerType);
+    }
+
+    [Fact]
+    public void DecodesNullLayerFlag()
+    {
+        Assert.True(Parse(new Ldta(Flags1: 0x80)).NullLayer);
+        Assert.False(Parse(new Ldta(Flags1: 0x04)).NullLayer);
+        Assert.True(Parse(new Ldta(Flags1: 0x04)).ThreeDEnabled);
     }
 
     [Fact]

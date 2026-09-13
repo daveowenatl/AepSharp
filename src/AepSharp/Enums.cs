@@ -32,6 +32,19 @@ public enum FootageType : ushort
     Photoshop = 0x109
 }
 
+/// <summary>Layer kind stored in the layer's ldta block (byte 131), per py-aep's LayerType.</summary>
+public enum LayerType : byte
+{
+    /// <summary>Audio/video layer: footage, composition, solid, or a null (see <see cref="AepLayer.NullLayer"/>).</summary>
+    AudioVideo = 0,
+    Light = 1,
+    Camera = 2,
+    Text = 3,
+    Shape = 4,
+    ThreeDModel = 5,
+    ParametricMesh = 7,
+}
+
 public enum LayerQuality : ushort
 {
     Wireframe = 0x0000,

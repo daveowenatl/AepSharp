@@ -14,6 +14,14 @@ public class AepLayer
     public LayerFrameBlendMode FrameBlendMode { get; internal set; }
     public bool GuideEnabled { get; internal set; }
     public bool SoloEnabled { get; internal set; }
+    /// <summary>The layer's kind (text, shape, camera, light, …); null when the ldta block is too short to hold it.</summary>
+    public LayerType? LayerType { get; internal set; }
+    /// <summary>True for null object layers (AV layers with no rendered content).</summary>
+    public bool NullLayer { get; internal set; }
+    /// <summary>Number of masks on the layer.</summary>
+    public int MaskCount { get; internal set; }
+    /// <summary>Number of text animators on a text layer.</summary>
+    public int TextAnimatorCount { get; internal set; }
     public bool ThreeDEnabled { get; internal set; }
     public bool AdjustmentLayerEnabled { get; internal set; }
     public bool CollapseTransformEnabled { get; internal set; }
@@ -246,6 +254,7 @@ public class AepLayer
         layer.SamplingMode = (LayerSamplingMode)((bits0 & (1 << 6)) >> 6);
         layer.FrameBlendMode = (LayerFrameBlendMode)((bits0 & (1 << 2)) >> 2);
         layer.GuideEnabled = ((bits0 & (1 << 1)) >> 1) == 1;
+        layer.NullLayer = (bits1 & (1 << 7)) != 0;
         layer.SoloEnabled = ((bits1 & (1 << 3)) >> 3) == 1;
         layer.ThreeDEnabled = ((bits1 & (1 << 2)) >> 2) == 1;
         layer.AdjustmentLayerEnabled = ((bits1 & (1 << 1)) >> 1) == 1;
@@ -273,6 +282,11 @@ public class AepLayer
             layer.Effects = effectsProp.Properties;
         }
 
+        // Each mask is an "ADBE Mask Atom" whose entries start with an mkif block before its
+        // property list, so count the atoms by match name rather than as parsed groups.
+        if (rootTDGP.TryGetValue("ADBE Mask Parade", out var masksTDGP))
+            layer.MaskCount = AepProperty.PairMatchNames(masksTDGP).matchNames.Count(n => n == "ADBE Mask Atom");
+
         if (rootTDGP.TryGetValue("ADBE Time Remapping", out var timeRemapTDBS))
             layer.TimeRemapEnabled = AepProperty.ParseFromList(timeRemapTDBS, "ADBE Time Remapping").IsAnimated;
 
@@ -285,6 +299,7 @@ public class AepLayer
         {
             layer.Text = AepProperty.ParseFromList(textTDGP, "ADBE Text Properties");
             PopulateTextContent(layer, layerHead);
+            layer.TextAnimatorCount = layer.Text.Properties.FirstOrDefault(p => p.MatchName == "ADBE Text Animators")?.Properties.Count ?? 0;
         }
 
         if (timeBase != 0)
@@ -299,7 +314,7 @@ public class AepLayer
     // ldta layout past the name (bytes 96+), per py-aep's LdtaChunk (MIT): blending mode
     // u8 at 99, transfer flags at 103 (bit 0 preserve transparency, bit 1 dancing
     // dissolve), track matte type u8 at 107, stretch divisor u32 at 108 (dividend s32 at
-    // 8), parent layer id u32 at 132, and — in files from After Effects 2023 on — the
+    // 8), layer type u8 at 131, parent layer id u32 at 132, and — in files from After Effects 2023 on — the
     // matte layer id u32 at 160. Shorter (older or synthetic) ldta blocks keep defaults.
     private static void ReadCompositingFields(AepLayer layer, byte[] ldta)
     {
@@ -317,6 +332,8 @@ public class AepLayer
             if (dividend != 0 && divisor != 0)
                 layer.Stretch = (double)dividend / divisor;
         }
+        if (ldta.Length >= 132)
+            layer.LayerType = (LayerType)ldta[131];
         if (ldta.Length >= 136)
         {
             var parent = BinaryPrimitives.ReadUInt32BigEndian(ldta.AsSpan(132));
