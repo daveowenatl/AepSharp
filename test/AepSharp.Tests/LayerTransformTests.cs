@@ -62,7 +62,7 @@ public class LayerTransformTests
         if (keyframes is { } count)
         {
             var lhd3 = new byte[52];
-            BinaryPrimitives.WriteUInt32BigEndian(lhd3.AsSpan(8), (uint)count);
+            BinaryPrimitives.WriteUInt16BigEndian(lhd3.AsSpan(10), (ushort)count);
             var list = new RifxList { Identifier = "list" };
             list.Blocks.Add(new RifxBlock { Type = "lhd3", Size = 20, Data = lhd3 });
             tdbs.Blocks.Add(List(list));
@@ -174,16 +174,6 @@ public class LayerTransformTests
         var prop = AepProperty.ParseFromList(tdbs, "ADBE Opacity");
 
         Assert.False(prop.IsAnimated);
-    }
-
-    [Fact]
-    public void KeyframeCountUsesTheFullU32Field()
-    {
-        // 0x0001_0002 = 65538: a u16 read at offset 10 would see only 2.
-        var layer = AepLayer.Parse(Layer((0, 1), (0, 1), (1, 1),
-            TransformGroup(("ADBE Position", Tdbs(3, null, keyframes: 65538)))), null!);
-
-        Assert.Equal(65538, layer.FindTransformProperty("ADBE Position")!.KeyframeCount);
     }
 
     [Fact]

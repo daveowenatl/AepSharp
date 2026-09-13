@@ -116,6 +116,8 @@ public class AepItem
                         throw new InvalidDataException("Missing cdta block in composition item");
                     var cdta = cdtaBlock.GetBytes();
                     var fpsDivisor = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(4));
+                    // Internal timebase (frame rate × 256 × time scale): also the units-per-second
+                    // for keyframe and layer times in this composition.
                     var fpsDividend = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(8));
                     item.Framerate = (double)fpsDividend / fpsDivisor;
                     var secDividend = BinaryPrimitives.ReadUInt32BigEndian(cdta.AsSpan(44));
@@ -130,7 +132,7 @@ public class AepItem
                     foreach (var layerList in itemHead.SublistFilter("Layr"))
                     {
                         layerIndex++;
-                        var layer = AepLayer.Parse(layerList, project);
+                        var layer = AepLayer.Parse(layerList, project, fpsDividend);
                         layer.Index = (uint)layerIndex;
                         item.CompositionLayers.Add(layer);
                     }

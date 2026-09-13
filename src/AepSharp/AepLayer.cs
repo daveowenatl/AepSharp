@@ -94,6 +94,14 @@ public class AepLayer
     private IReadOnlyList<double>? TransformValue(string matchName) => FindTransformProperty(matchName)?.Value;
 
     /// <summary>
+    /// A Transform property's pre-expression value at <paramref name="compositionTime"/>
+    /// seconds of composition time, interpolating keyframes when the property is
+    /// animated. Null when the property is absent or left at its default.
+    /// </summary>
+    public IReadOnlyList<double>? TransformValueAt(string matchName, double compositionTime) =>
+        FindTransformProperty(matchName)?.ValueAtTime(compositionTime - StartTime);
+
+    /// <summary>
     /// The layer's on-screen text copy, decoded from the text-document EngineData
     /// blob. Null for non-text layers; "" when the text run is empty. Read
     /// structurally (all runs concatenated) with a heuristic fallback.
@@ -116,7 +124,11 @@ public class AepLayer
     /// </summary>
     public IReadOnlyList<AepTextRun> TextRuns { get; internal set; } = Array.Empty<AepTextRun>();
 
-    internal static AepLayer Parse(RifxList layerHead, AepProject project)
+    /// <param name="timeBase">
+    /// The containing composition's internal timebase (units per second, cdta offset 8),
+    /// used to convert keyframe times. Zero leaves keyframe times unresolved (NaN).
+    /// </param>
+    internal static AepLayer Parse(RifxList layerHead, AepProject project, uint timeBase = 0)
     {
         var layer = new AepLayer();
 
@@ -181,7 +193,23 @@ public class AepLayer
             PopulateTextContent(layer, layerHead);
         }
 
+        if (timeBase != 0)
+        {
+            foreach (var root in layer.Effects.Append(layer.Transform).Append(layer.Text))
+                AssignTimeBase(root, timeBase);
+        }
+
         return layer;
+    }
+
+    private static void AssignTimeBase(AepProperty? property, uint timeBase)
+    {
+        if (property is null)
+            return;
+        foreach (var keyframe in property.Keyframes)
+            keyframe.TimeBase = timeBase;
+        foreach (var child in property.Properties)
+            AssignTimeBase(child, timeBase);
     }
 
     private static double ReadTime(byte[] ldta, int offset)

@@ -19,7 +19,7 @@ public class AepProperty
     /// one element for scalars like Opacity). Values are exposed exactly as the
     /// file stores them: percent-typed properties are fractions (100% = 1.0).
     /// Null for groups, for properties without a static value, and for animated
-    /// properties (keyframes are not yet decoded).
+    /// properties (use <see cref="Keyframes"/> and <see cref="ValueAtTime"/>).
     /// </summary>
     public IReadOnlyList<double>? Value { get; internal set; }
 
@@ -32,6 +32,41 @@ public class AepProperty
 
     /// <summary>True when the property has keyframes (its value varies over time).</summary>
     public bool IsAnimated => KeyframeCount > 0;
+
+    /// <summary>Number of value components (e.g. 3 for Position, 1 for Opacity). Zero for groups.</summary>
+    public int Dimensions { get; internal set; }
+
+    /// <summary>
+    /// True for spatial properties (Position, Anchor Point, effect points), whose
+    /// keyframes carry spatial tangents and interpolate along a path.
+    /// </summary>
+    public bool IsSpatial { get; internal set; }
+
+    /// <summary>
+    /// Decoded keyframes in time order. Empty for static properties. Keyframes whose
+    /// kind has no numeric value (markers, colours, shapes) have a null
+    /// <see cref="AepKeyframe.Value"/>.
+    /// </summary>
+    public IReadOnlyList<AepKeyframe> Keyframes { get; internal set; } = Array.Empty<AepKeyframe>();
+
+    /// <summary>
+    /// The property's expression source, or null if it has none. An enabled
+    /// expression overrides the keyframed or static value at render time; this
+    /// library does not evaluate expressions.
+    /// </summary>
+    public string? Expression { get; internal set; }
+
+    /// <summary>True when <see cref="Expression"/> is present and not disabled.</summary>
+    public bool ExpressionEnabled { get; internal set; }
+
+    /// <summary>
+    /// The property's pre-expression value at <paramref name="layerTime"/> seconds of
+    /// layer time, interpolated from its keyframes (hold, linear, Bezier with temporal
+    /// ease, spatial paths, auto-Bezier). Returns the static <see cref="Value"/> when
+    /// the property is not animated, or null when neither is available.
+    /// </summary>
+    public IReadOnlyList<double>? ValueAtTime(double layerTime) =>
+        Keyframes.Count == 0 ? Value : KeyframeInterpolator.Interpolate(layerTime, Keyframes, IsSpatial);
 
     internal static AepProperty ParseFromList(RifxList propHead, string matchName)
     {
@@ -62,6 +97,8 @@ public class AepProperty
         {
             prop.Value = DecodeStaticValue(propHead);
             prop.KeyframeCount = DecodeKeyframeCount(propHead);
+            DecodeValueMetadata(prop, propHead);
+            prop.Keyframes = KeyframeDecoder.Decode(propHead, prop.Dimensions, prop.IsSpatial);
         }
 
         // Handle effect sub-properties (sspc identifier)
@@ -124,16 +161,40 @@ public class AepProperty
     }
 
     // Animated properties carry a "list" LIST whose lhd3 header holds the keyframe
-    // count as a big-endian u32 at offset 8 (and each keyframe's byte size as a u32
-    // at offset 16; count × size equals the ldat payload length across a 181-file
-    // production corpus).
+    // count as a big-endian u16 at offset 10, after a fixed prefix (00 D0 0B EE and
+    // zeros), and each keyframe's byte size as a u16 at offset 18. Count × size equals
+    // the ldat payload length for every animated property in a 181-file production
+    // corpus. Layout per py-aep (MIT), which writes files After Effects accepts.
     private static int DecodeKeyframeCount(RifxList tdbs)
     {
         var lhd3 = tdbs.SublistFind("list")?.FindByType("lhd3")?.GetBytes();
         if (lhd3 is null || lhd3.Length < 12)
             return 0;
-        var count = BinaryPrimitives.ReadUInt32BigEndian(lhd3.AsSpan(8));
-        return count > int.MaxValue ? 0 : (int)count;
+        return BinaryPrimitives.ReadUInt16BigEndian(lhd3.AsSpan(10));
+    }
+
+    // tdb4 (property metadata): dimensions u16 at 2; spatial flag bit 3 of byte 5;
+    // expression-disabled bit 0 of byte 119. The expression source itself is the
+    // tdbs list's Utf8 block. Offsets per py-aep's Tdb4Chunk.
+    private static void DecodeValueMetadata(AepProperty prop, RifxList tdbs)
+    {
+        var tdb4 = tdbs.FindByType("tdb4")?.GetBytes();
+        if (tdb4 is { Length: >= 6 })
+        {
+            prop.Dimensions = BinaryPrimitives.ReadUInt16BigEndian(tdb4.AsSpan(2));
+            prop.IsSpatial = (tdb4[5] & (1 << 3)) != 0;
+        }
+
+        var utf8 = tdbs.FindByType("Utf8");
+        if (utf8 is not null)
+        {
+            var expression = utf8.ToAsciiString();
+            if (!string.IsNullOrWhiteSpace(expression))
+            {
+                prop.Expression = expression;
+                prop.ExpressionEnabled = tdb4 is not { Length: >= 120 } || (tdb4[119] & 1) == 0;
+            }
+        }
     }
 
     internal static AepProperty ParseFromBlocks(List<object> entries, string matchName)

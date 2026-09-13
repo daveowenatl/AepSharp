@@ -44,10 +44,14 @@
                     Label: ,
                     Index: 1,
                     PropertyType: Boolean,
-                    IsAnimated: false
+                    IsAnimated: false,
+                    IsSpatial: false,
+                    ExpressionEnabled: false
                   }
                 ],
-                IsAnimated: false
+                IsAnimated: false,
+                IsSpatial: false,
+                ExpressionEnabled: false
               },
               {
                 MatchName: ADBE Slider Control,
@@ -62,10 +66,14 @@
                     Label: ,
                     Index: 1,
                     PropertyType: OneD,
-                    IsAnimated: false
+                    IsAnimated: false,
+                    IsSpatial: false,
+                    ExpressionEnabled: false
                   }
                 ],
-                IsAnimated: false
+                IsAnimated: false,
+                IsSpatial: false,
+                ExpressionEnabled: false
               },
               {
                 MatchName: ADBE Point Control,
@@ -80,10 +88,14 @@
                     Label: ,
                     Index: 1,
                     PropertyType: TwoD,
-                    IsAnimated: false
+                    IsAnimated: false,
+                    IsSpatial: false,
+                    ExpressionEnabled: false
                   }
                 ],
-                IsAnimated: false
+                IsAnimated: false,
+                IsSpatial: false,
+                ExpressionEnabled: false
               },
               {
                 MatchName: ADBE Point3D Control,
@@ -98,10 +110,14 @@
                     Label: ,
                     Index: 1,
                     PropertyType: ThreeD,
-                    IsAnimated: false
+                    IsAnimated: false,
+                    IsSpatial: false,
+                    ExpressionEnabled: false
                   }
                 ],
-                IsAnimated: false
+                IsAnimated: false,
+                IsSpatial: false,
+                ExpressionEnabled: false
               },
               {
                 MatchName: ADBE Color Control,
@@ -116,10 +132,14 @@
                     Label: ,
                     Index: 1,
                     PropertyType: Color,
-                    IsAnimated: false
+                    IsAnimated: false,
+                    IsSpatial: false,
+                    ExpressionEnabled: false
                   }
                 ],
-                IsAnimated: false
+                IsAnimated: false,
+                IsSpatial: false,
+                ExpressionEnabled: false
               },
               {
                 MatchName: ADBE Angle Control,
@@ -134,10 +154,14 @@
                     Label: ,
                     Index: 1,
                     PropertyType: Angle,
-                    IsAnimated: false
+                    IsAnimated: false,
+                    IsSpatial: false,
+                    ExpressionEnabled: false
                   }
                 ],
-                IsAnimated: false
+                IsAnimated: false,
+                IsSpatial: false,
+                ExpressionEnabled: false
               },
               {
                 MatchName: ADBE Layer Control,
@@ -151,10 +175,14 @@
                     Name: Layer,
                     Label: ,
                     Index: 1,
-                    IsAnimated: false
+                    IsAnimated: false,
+                    IsSpatial: false,
+                    ExpressionEnabled: false
                   }
                 ],
-                IsAnimated: false
+                IsAnimated: false,
+                IsSpatial: false,
+                ExpressionEnabled: false
               }
             ],
             OutPoint: 60.0,
@@ -174,7 +202,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -185,7 +216,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -193,7 +227,9 @@
                   Label: ,
                   Index: 3,
                   PropertyType: Custom,
-                  IsAnimated: false
+                  IsAnimated: false,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -204,7 +240,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -215,7 +254,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -226,10 +268,15 @@
                   Value: [
                     1.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 }
               ],
-              IsAnimated: false
+              IsAnimated: false,
+              IsSpatial: false,
+              ExpressionEnabled: false
             }
           },
           {
@@ -260,7 +307,9 @@
                   Label: ,
                   Index: 1,
                   PropertyType: Custom,
-                  IsAnimated: false
+                  IsAnimated: false,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Text Path Options,
@@ -268,7 +317,9 @@
                   Label: ,
                   Index: 2,
                   PropertyType: Custom,
-                  IsAnimated: false
+                  IsAnimated: false,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Text More Options,
@@ -276,10 +327,14 @@
                   Label: ,
                   Index: 3,
                   PropertyType: Custom,
-                  IsAnimated: false
+                  IsAnimated: false,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 }
               ],
-              IsAnimated: false
+              IsAnimated: false,
+              IsSpatial: false,
+              ExpressionEnabled: false
             },
             OutPoint: 60.0,
             CompositionOutPoint: 60.0,
@@ -298,7 +353,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -309,7 +367,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -317,7 +378,9 @@
                   Label: ,
                   Index: 3,
                   PropertyType: Custom,
-                  IsAnimated: false
+                  IsAnimated: false,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -328,7 +391,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -339,7 +405,10 @@
                   Value: [
                     0.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -350,10 +419,15 @@
                   Value: [
                     1.0
                   ],
-                  IsAnimated: false
+                  IsAnimated: false,
+                  Dimensions: 1,
+                  IsSpatial: false,
+                  ExpressionEnabled: false
                 }
               ],
-              IsAnimated: false
+              IsAnimated: false,
+              IsSpatial: false,
+              ExpressionEnabled: false
             },
             SourceText: Text Layer,
             Fonts: [
