@@ -210,6 +210,23 @@ public class KeyframeTests
         Assert.False(AepProperty.ParseFromList(tdbs, "ADBE Opacity").ExpressionEnabled);
     }
 
+    [Fact]
+    public void DecodesSourceTextExpressionFromTextDocumentList()
+    {
+        var tdbs = new RifxList { Identifier = "tdbs" };
+        tdbs.Blocks.Add(new RifxBlock { Type = "tdb4", Size = 124, Data = new byte[124] });
+        var source = "temptxt = value;";
+        tdbs.Blocks.Add(new RifxBlock { Type = "Utf8", Size = (uint)source.Length, Data = Encoding.UTF8.GetBytes(source) });
+        var btds = new RifxList { Identifier = "btds" };
+        btds.Blocks.Add(new RifxBlock { Type = "LIST", Data = tdbs });
+        btds.Blocks.Add(new RifxBlock { Type = "LIST", Data = new RifxList { Identifier = "btdk", RawPayload = [] } });
+
+        var document = AepProperty.ParseFromList(btds, "ADBE Text Document");
+
+        Assert.Equal(source, document.Expression);
+        Assert.True(document.ExpressionEnabled);
+    }
+
     // ---- interpolation (expected values from py-aep 0.16.0) -------------------
 
     [Fact]

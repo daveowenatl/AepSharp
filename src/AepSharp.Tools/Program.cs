@@ -276,6 +276,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
             Source = source is null ? null : new { source.Id, source.Name, Kind = source.ItemType.ToString() },
             Visible = layer.VideoEnabled,
             Audible = layer.AudioEnabled,
+            MotionBlur = layer.MotionBlurEnabled ? true : (bool?)null,
             layer.GuideEnabled,
             In = layer.CompositionInPoint,
             Out = layer.CompositionOutPoint,
@@ -297,6 +298,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
             Animated = layer.Transform?.Properties.Where(p => p.IsAnimated)
                 .Select(p => Animated(composition, layer, p, bake)).ToList() is { Count: > 0 } animated ? animated : null,
             Effects = layer.Effects.Count > 0 ? layer.Effects.Select(e => Effect(composition, layer, e, bake)).ToList() : null,
+            Expressions = Expressions(layer) is { Count: > 0 } expressions ? expressions : null,
             Text = layer.SourceText is null ? null : new
             {
                 Content = layer.SourceText,
@@ -325,6 +327,28 @@ internal sealed class SceneCommand : Command<SceneSettings>
             Animated = p.IsAnimated ? Animated(composition, layer, p, bake) : null,
         }).ToList(),
     };
+
+    // Every expression on the layer's transform, effect and text properties, with a
+    // path of match names (e.g. "ADBE Transform Group/ADBE Opacity").
+    private static List<object> Expressions(AepLayer layer)
+    {
+        var found = new List<object>();
+        void Walk(AepProperty? property, string path)
+        {
+            if (property is null)
+                return;
+            var here = path.Length == 0 ? property.MatchName : $"{path}/{property.MatchName}";
+            if (property.Expression is { } expression)
+                found.Add(new { Property = here, Expression = expression, Enabled = property.ExpressionEnabled });
+            foreach (var child in property.Properties)
+                Walk(child, here);
+        }
+        Walk(layer.Transform, "");
+        foreach (var effect in layer.Effects)
+            Walk(effect, "ADBE Effect Parade");
+        Walk(layer.Text, "");
+        return found;
+    }
 
     // Keyframe times are emitted in composition time. Baked values sample the
     // pre-expression value at each composition frame the layer is visible.

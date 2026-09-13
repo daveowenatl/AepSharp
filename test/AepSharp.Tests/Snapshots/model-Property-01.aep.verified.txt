@@ -339,6 +339,7 @@
                   Index: 1,
                   PropertyType: Custom,
                   IsAnimated: false,
+                  Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false
                 },

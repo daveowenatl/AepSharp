@@ -104,7 +104,7 @@ Reads:
   start/in/out times, time stretch, blending mode, track matte and matte layer
 - Transform values (anchor point, position, scale, rotation, opacity)
 - Keyframes for numeric properties, with After Effects-style interpolation
-- Expression source and whether it's enabled
+- Expression source and whether it's enabled, including Source Text expressions
 - Effects: names and parameters with their current values or keyframes (including
   repeat instances that share the project's effect definitions), layer references
 - Text: copy, fonts, styled runs (size, colours, tracking, leading), paragraph
@@ -135,7 +135,8 @@ dotnet run --project src/AepSharp.Tools -- rifx template.aep --format json
 `rifx` prints each chunk with its absolute offset, FourCC, declared vs. actual size, a
 hex/ascii preview, and a flag if it looks truncated or overflowing. `scene` is meant as
 input for renderers and template tooling: footage with `sourcePath`; layers with
-`blendingMode`, `trackMatte`, `stretch`, each effect's `parameters` (`name`, `value`,
+`blendingMode`, `trackMatte`, `stretch`, `motionBlur`, every enabled or disabled
+expression (`property` as a match-name path, `expression`, `enabled`), each effect's `parameters` (`name`, `value`,
 and keyframes/baked frames when animated); text with `justification`, `boxText`,
 `boxSize` and `boxPosition`.
 

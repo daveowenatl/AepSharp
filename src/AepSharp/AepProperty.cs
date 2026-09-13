@@ -114,6 +114,11 @@ public class AepProperty
             prop.Keyframes = KeyframeDecoder.Decode(propHead, prop.Dimensions, prop.IsSpatial);
         }
 
+        // Source Text: a btds list wraps the text document's tdbs (metadata and any
+        // expression) alongside the btdk EngineData.
+        if (propHead.Identifier == "btds" && propHead.SublistFind("tdbs") is { } documentTdbs)
+            DecodeValueMetadata(prop, documentTdbs);
+
         // Handle effect sub-properties (sspc identifier)
         if (propHead.Identifier == "sspc")
         {
