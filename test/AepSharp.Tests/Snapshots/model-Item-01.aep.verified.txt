@@ -35,7 +35,11 @@
                 AudioEnabled: true,
                 VideoEnabled: true,
                 OutPoint: 31.0,
+                Stretch: 1.0,
                 CompositionOutPoint: 31.0,
+                TimeRemapEnabled: false,
+                Id: 79,
+                PreserveTransparency: false,
                 Transform: {
                   MatchName: ADBE Transform Group,
                   Name: ADBE Transform Group,
@@ -126,7 +130,8 @@
                   IsAnimated: false,
                   IsSpatial: false,
                   ExpressionEnabled: false
-                }
+                },
+                IsBoxText: false
               },
               {
                 Index: 2,
@@ -145,7 +150,11 @@
                 AudioEnabled: true,
                 VideoEnabled: true,
                 OutPoint: 31.0,
+                Stretch: 1.0,
                 CompositionOutPoint: 31.0,
+                TimeRemapEnabled: false,
+                Id: 76,
+                PreserveTransparency: false,
                 Transform: {
                   MatchName: ADBE Transform Group,
                   Name: ADBE Transform Group,
@@ -236,7 +245,8 @@
                   IsAnimated: false,
                   IsSpatial: false,
                   ExpressionEnabled: false
-                }
+                },
+                IsBoxText: false
               }
             ]
           }
@@ -294,7 +304,7 @@
             BackgroundColor: AAAA
           },
           {
-            Name: Red Solid 1,
+            Name: Red Solid,
             Id: 72,
             ItemType: Footage,
             Width: 1920,

@@ -14,10 +14,22 @@ public enum ItemType
     Footage
 }
 
+/// <summary>
+/// Footage source kind, read from the footage item's <c>opti</c> block (u16 at offset 4).
+/// Values other than these can occur; they are exposed as the raw number.
+/// </summary>
 public enum FootageType : ushort
 {
+    /// <summary>Still image file (PNG, JPEG, TIFF...).</summary>
+    Image = 0x01,
     Placeholder = 0x02,
-    Solid = 0x09
+    /// <summary>Audio and/or video file (MP4, MOV, MP3, WAV...).</summary>
+    AudioVideo = 0x05,
+    /// <summary>Vector file (AI, EPS, PDF).</summary>
+    Vector = 0x08,
+    Solid = 0x09,
+    /// <summary>Photoshop document.</summary>
+    Photoshop = 0x109
 }
 
 public enum LayerQuality : ushort
@@ -51,4 +63,74 @@ public enum PropertyType : ushort
     Group = 0x0D,
     Custom = 0x0F,
     ThreeD = 0x12
+}
+
+/// <summary>
+/// A layer's blending (transfer) mode, as After Effects scripting names them
+/// (<c>AVLayer.blendingMode</c>). Decoded from the SDK <c>PF_Xfer</c> value at ldta
+/// byte 99 using py-aep's mapping; <see cref="DancingDissolve"/> is Dissolve plus a
+/// flag bit.
+/// </summary>
+public enum BlendingMode
+{
+    Normal,
+    Dissolve,
+    DancingDissolve,
+    Darken,
+    Multiply,
+    LinearBurn,
+    ColorBurn,
+    ClassicColorBurn,
+    Add,
+    Lighten,
+    Screen,
+    LinearDodge,
+    ColorDodge,
+    ClassicColorDodge,
+    Overlay,
+    SoftLight,
+    HardLight,
+    LinearLight,
+    VividLight,
+    PinLight,
+    HardMix,
+    Difference,
+    ClassicDifference,
+    Exclusion,
+    Hue,
+    Saturation,
+    Color,
+    Luminosity,
+    StencilAlpha,
+    StencilLuma,
+    SilhouetteAlpha,
+    SilhouetteLuma,
+    AlphaAdd,
+    LuminescentPremul,
+    LighterColor,
+    DarkerColor,
+    Subtract,
+    Divide,
+}
+
+/// <summary>How a layer uses its track matte (<c>AVLayer.trackMatteType</c>).</summary>
+public enum TrackMatteType : byte
+{
+    None = 0,
+    Alpha = 1,
+    AlphaInverted = 2,
+    Luma = 3,
+    LumaInverted = 4,
+}
+
+/// <summary>Paragraph justification of a text layer (<c>TextDocument.justification</c>).</summary>
+public enum TextJustification
+{
+    Left = 0,
+    Right = 1,
+    Center = 2,
+    FullJustifyLastLineLeft = 3,
+    FullJustifyLastLineRight = 4,
+    FullJustifyLastLineCenter = 5,
+    FullJustifyLastLineFull = 6,
 }

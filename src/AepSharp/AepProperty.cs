@@ -60,6 +60,13 @@ public class AepProperty
     public bool ExpressionEnabled { get; internal set; }
 
     /// <summary>
+    /// For a layer-select effect parameter (e.g. Layer Control): the <see cref="AepLayer.Id"/>
+    /// of the referenced layer in the same composition, or null when none is chosen or the
+    /// property is not a layer reference. Read from the value's <c>tdpi</c> block.
+    /// </summary>
+    public uint? LayerReferenceId { get; internal set; }
+
+    /// <summary>
     /// The property's pre-expression value at <paramref name="layerTime"/> seconds of
     /// layer time, interpolated from its keyframes (hold, linear, Bezier with temporal
     /// ease, spatial paths, auto-Bezier). Returns the static <see cref="Value"/> when
@@ -68,7 +75,11 @@ public class AepProperty
     public IReadOnlyList<double>? ValueAtTime(double layerTime) =>
         Keyframes.Count == 0 ? Value : KeyframeInterpolator.Interpolate(layerTime, Keyframes, IsSpatial);
 
-    internal static AepProperty ParseFromList(RifxList propHead, string matchName)
+    /// <param name="effectDefinitions">
+    /// Project-level effect parameter definitions (the <c>EfdG</c> list), used when an
+    /// effect instance omits its own <c>parT</c>. Null outside a project parse.
+    /// </param>
+    internal static AepProperty ParseFromList(RifxList propHead, string matchName, EffectDefinitions? effectDefinitions = null)
     {
         var prop = new AepProperty
         {
@@ -76,17 +87,19 @@ public class AepProperty
             Name = matchName == "ADBE Effect Parade" ? "Effects" : matchName
         };
 
-        // Parse sub-properties from tdgp groups
-        var (tdgpMap, orderedNames) = IndexedGroupToMap(propHead);
-        for (int idx = 0; idx < orderedNames.Count; idx++)
+        // Parse sub-properties from tdgp groups. Walk the (match name, list) pairs in
+        // order rather than through a name-keyed map: an effect parade can hold several
+        // instances of the same effect (e.g. three "ADBE Slider Control"s), and each must
+        // keep its own list.
+        var (subNames, subContents) = PairMatchNames(propHead);
+        var subIndex = 0;
+        for (int i = 0; i < subNames.Count && i < subContents.Count; i++)
         {
-            var mn = orderedNames[idx];
-            if (tdgpMap.TryGetValue(mn, out var subData))
-            {
-                var subProp = ParseFromList(subData, mn);
-                subProp.Index = (uint)(idx + 1);
-                prop.Properties.Add(subProp);
-            }
+            if (subContents[i].Count == 0 || subContents[i][0] is not RifxList subData)
+                continue;
+            var subProp = ParseFromList(subData, subNames[i], effectDefinitions);
+            subProp.Index = (uint)++subIndex;
+            prop.Properties.Add(subProp);
         }
 
         // A tdbs list is a property's value container: tdb4 describes the value
@@ -124,20 +137,63 @@ public class AepProperty
                 }
             }
 
-            // Parse parT sub-properties
+            // Pseudo effects (Animation Presets, scripted controls) have an empty fnam; the
+            // name shown in the Effect Controls panel is then the tdsn label.
+            if (string.IsNullOrEmpty(prop.Name) && !string.IsNullOrEmpty(prop.Label))
+                prop.Name = prop.Label;
+
+            // Parse parT sub-properties. After Effects writes an empty parT for repeat
+            // instances of an effect type; the definitions then come from the project's
+            // EfdG list (or an earlier instance), as py-aep resolves them.
             var parTList = propHead.SublistMerge("parT");
+            if (effectDefinitions is not null)
+                parTList = effectDefinitions.Resolve(matchName, parTList);
+
+            // Current parameter values live in the effect's tdgp as tdbs lists keyed by
+            // parameter match name; a parameter left untouched has no tdbs and keeps the
+            // last value recorded in its pard.
+            var valueLists = tdgpBlock is null
+                ? new Dictionary<string, RifxList>()
+                : IndexedGroupToMap(tdgpBlock).map;
+
             var (subMatchNames, subPards) = PairMatchNames(parTList);
             for (int idx = 0; idx < subMatchNames.Count; idx++)
             {
                 // Skip first pard entry (describes parent)
                 if (idx == 0) continue;
+                if (idx >= subPards.Count) break;
                 var subProp = ParseFromBlocks(subPards[idx], subMatchNames[idx]);
                 subProp.Index = (uint)idx;
+                if (valueLists.TryGetValue(subMatchNames[idx], out var valueList) && valueList.Identifier == "tdbs")
+                    ApplyStoredValue(subProp, valueList);
                 prop.Properties.Add(subProp);
             }
         }
 
         return prop;
+    }
+
+    // Copies an effect parameter's stored value (static cdat or keyframes, plus
+    // expression and layer reference) over the pard-derived fallback.
+    private static void ApplyStoredValue(AepProperty parameter, RifxList tdbs)
+    {
+        var stored = ParseFromList(tdbs, parameter.MatchName);
+        parameter.Value = stored.Value;
+        parameter.KeyframeCount = stored.KeyframeCount;
+        parameter.Dimensions = stored.Dimensions;
+        parameter.IsSpatial = stored.IsSpatial;
+        parameter.Keyframes = stored.Keyframes;
+        parameter.Expression = stored.Expression;
+        parameter.ExpressionEnabled = stored.ExpressionEnabled;
+
+        if (parameter.PropertyType == PropertyType.LayerSelect)
+        {
+            // The layer id is the reference; cdat holds only zeros.
+            parameter.Value = null;
+            var tdpi = tdbs.FindByType("tdpi")?.GetBytes();
+            if (tdpi is { Length: >= 4 } && BinaryPrimitives.ReadUInt32BigEndian(tdpi) is var layerId and not 0)
+                parameter.LayerReferenceId = layerId;
+        }
     }
 
     private static IReadOnlyList<double>? DecodeStaticValue(RifxList tdbs)
@@ -232,9 +288,15 @@ public class AepProperty
                                 ? PropertyType.OneD
                                 : (PropertyType)typeValue;
 
-                            var pardName = Encoding.UTF8.GetString(data, 16, 32).TrimEnd('\0');
+                            // NUL-terminated: the rest of the 32-byte field can hold stale
+                            // bytes ("Opacity\0olor").
+                            var nameField = data.AsSpan(16, 32);
+                            var nameEnd = nameField.IndexOf((byte)0);
+                            var pardName = Encoding.UTF8.GetString(nameEnd < 0 ? nameField : nameField[..nameEnd]);
                             if (!string.IsNullOrEmpty(pardName))
                                 prop.Name = pardName;
+                            prop.Value = DecodePardValue(data);
+                            prop.Dimensions = prop.Value?.Count ?? 0;
                             break;
                         }
                 }
@@ -242,6 +304,45 @@ public class AepProperty
         }
 
         return prop;
+    }
+
+    // The pard block is a serialized AE SDK PF_ParamDef: a 56-byte header (control type
+    // u8 at 15, name at 16..47) followed by a type-specific body whose first field is the
+    // parameter's last value. Layouts per py-aep's PardChunk variants (MIT). Values are
+    // returned in the units the parameter's cdat uses, so a parameter reads the same
+    // whether or not After Effects wrote a tdbs for it:
+    //   1 integer slider   s32 at 56
+    //   2 fixed slider     s32 16.16 fixed point at 56
+    //   3 angle            s32 16.16 fixed point at 56 (degrees)
+    //   4 checkbox         u8 default at 60 (0/1); py-aep prefers it over the u32 last
+    //                      value at 56, matching what After Effects scripting reports
+    //   5 colour           u8 A,R,G,B at 56..59 (cdat stores ARGB 0-255)
+    //   6 2D point         s32 x,y at 56/60 in 1/128ths of a 0-512 range; cdat stores
+    //                      fractions of the layer size, so both are divided by 512
+    //   7 popup            u32 at 56 (1-based option index)
+    //  10 float slider     f64 at 56
+    // Other control types (layer, mask/path, group, 3D point, curves...) have no pard value.
+    internal static IReadOnlyList<double>? DecodePardValue(byte[] data)
+    {
+        if (data.Length < 16)
+            return null;
+        var body = data.AsSpan(56 <= data.Length ? 56 : data.Length);
+        return data[15] switch
+        {
+            1 when body.Length >= 4 => [BinaryPrimitives.ReadInt32BigEndian(body)],
+            2 or 3 when body.Length >= 4 => [BinaryPrimitives.ReadInt32BigEndian(body) / 65536.0],
+            4 when body.Length >= 5 => [body[4]],
+            4 when body.Length >= 4 => [BinaryPrimitives.ReadUInt32BigEndian(body)],
+            7 when body.Length >= 4 => [BinaryPrimitives.ReadUInt32BigEndian(body)],
+            5 when body.Length >= 4 => [body[0], body[1], body[2], body[3]],
+            6 when body.Length >= 8 =>
+            [
+                BinaryPrimitives.ReadInt32BigEndian(body) / 128.0 / 512.0,
+                BinaryPrimitives.ReadInt32BigEndian(body[4..]) / 128.0 / 512.0,
+            ],
+            10 when body.Length >= 8 => [BinaryPrimitives.ReadDoubleBigEndian(body)],
+            _ => null,
+        };
     }
 
     internal static (List<string> matchNames, List<List<object>> data) PairMatchNames(RifxList head)

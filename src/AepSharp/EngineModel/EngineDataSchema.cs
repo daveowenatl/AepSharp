@@ -22,6 +22,17 @@ internal static class EngineDataSchema
     /// <summary>In the resource dict: the font set; its entry array sits under <see cref="Entry"/>.</summary>
     public const string FontSet = "1";
 
+    /// <summary>In the resource dict: the text frame set; frame 0 is at Entry[0]/Entry.</summary>
+    public const string FrameSet = "8";
+
+    // --- text frame dict (resource /8/0[0]/0), per py-aep ---
+
+    /// <summary>In a frame: the box geometry dict. Present only for box (paragraph) text.</summary>
+    public const string FrameBox = "1";
+
+    /// <summary>In a frame's box dict: the outline as a flat [x0, y0, x1, y1, ...] array.</summary>
+    public const string BoxOutline = "0";
+
     // --- document dict ---
 
     /// <summary>In the document dict: the paragraph-run array. Each run's text is at Entry/Entry.</summary>
@@ -35,8 +46,19 @@ internal static class EngineDataSchema
 
     // --- inside a run's content dict ---
 
+    /// <summary>The per-paragraph ParagraphRun dict; its span array sits under <see cref="Entry"/>.</summary>
+    public const string ParagraphRun = "5";
+
     /// <summary>The per-character StyleRun dict; its span array sits under <see cref="Entry"/>.</summary>
     public const string StyleRun = "6";
+
+    // --- inside a ParagraphRun span's /0/0 holder: the paragraph style dict is at ParagraphRun ---
+
+    /// <summary>In a paragraph style: justification, 0..6 (left, right, center, then the four full-justify variants).</summary>
+    public const string Justification = "0";
+
+    /// <summary>In a paragraph style: the auto-leading factor (default 1.2).</summary>
+    public const string AutoLeadingFactor = "7";
 
     // --- inside a StyleRun span ---
 
@@ -50,6 +72,15 @@ internal static class EngineDataSchema
 
     /// <summary>Font size in points.</summary>
     public const string FontSize = "1";
+
+    /// <summary>Auto leading on/off (default on).</summary>
+    public const string AutoLeading = "4";
+
+    /// <summary>Explicit leading in points (ignored while auto leading is on).</summary>
+    public const string Leading = "5";
+
+    /// <summary>Tracking in thousandths of an em.</summary>
+    public const string Tracking = "8";
 
     /// <summary>Fill colour; the tuple lives at Entry/<see cref="ColorValue"/>.</summary>
     public const string FillColor = "53";

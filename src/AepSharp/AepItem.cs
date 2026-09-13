@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Text;
+using System.Text.Json;
 using AepSharp.Rifx;
 
 namespace AepSharp;
@@ -15,6 +16,16 @@ public class AepItem
     public double Framerate { get; internal set; }
     public double DurationSeconds { get; internal set; }
     public FootageType FootageType { get; internal set; }
+
+    /// <summary>
+    /// Full path of a file-backed footage item's source as After Effects last saw it
+    /// (e.g. <c>/Users/x/(Footage)/CTA.png</c>, or a Windows path for projects saved on
+    /// Windows); for an image sequence, the containing folder. Read from the <c>alas</c>
+    /// JSON record in the item's <c>Pin</c> / <c>Als2</c> list. Null for solids,
+    /// placeholders, compositions and folders, and when the record is missing or
+    /// not JSON (older binary aliases).
+    /// </summary>
+    public string? SourcePath { get; internal set; }
     public byte[] BackgroundColor { get; internal set; } = new byte[3];
     public List<AepLayer> CompositionLayers { get; internal set; } = new();
 
@@ -85,6 +96,8 @@ public class AepItem
                     var fpsFrac = BinaryPrimitives.ReadUInt16BigEndian(sspc.AsSpan(60));
                     item.Framerate = fpsWhole + ((double)fpsFrac / (1 << 16));
 
+                    item.SourcePath = ReadSourcePath(pinList);
+
                     var optiBlock = pinList.FindByType("opti");
                     if (optiBlock != null)
                     {
@@ -94,18 +107,29 @@ public class AepItem
                         {
                             case FootageType.Solid:
                                 {
-                                    var end = Math.Min(255, optiData.Length);
-                                    var nameBytes = optiData[26..end];
-                                    item.Name = ExtractNullPaddedString(nameBytes);
+                                    // NUL-terminated: bytes after the terminator can be stale
+                                    // leftovers of an earlier, longer name.
+                                    var end = Math.Min(26 + 256, optiData.Length);
+                                    item.Name = end > 26 ? NullTerminatedUtf8(optiData.AsSpan(26, end - 26)) : "";
                                     break;
                                 }
                             case FootageType.Placeholder:
                                 {
-                                    var nameBytes = optiData[10..];
-                                    item.Name = ExtractNullPaddedString(nameBytes);
+                                    item.Name = optiData.Length > 10 ? NullTerminatedUtf8(optiData.AsSpan(10)) : "";
                                     break;
                                 }
                         }
+                    }
+
+                    // After Effects leaves the item name empty for file footage that was
+                    // never renamed and shows the source file name instead — prefixed with
+                    // the source layer for a single layer of a layered Illustrator/PDF file.
+                    if (string.IsNullOrEmpty(item.Name) && item.SourcePath is { Length: > 0 } path)
+                    {
+                        var sourceLayer = optiBlock is not null && item.FootageType == FootageType.Vector
+                            ? VectorLayerName(optiBlock.GetBytes())
+                            : "";
+                        item.Name = sourceLayer.Length > 0 ? $"{sourceLayer}/{FileNameOf(path)}" : FileNameOf(path);
                     }
                     break;
                 }
@@ -144,21 +168,53 @@ public class AepItem
         return item;
     }
 
-    private static string ExtractNullPaddedString(byte[] data)
+    // The alas payload is a UTF-8 JSON record in current After Effects versions, e.g.
+    // {"ascendcount_base":2,"ascendcount_target":3,"fullpath":"/Users/x/CTA.png",
+    //  "platform":2,"target_is_folder":false}. Layout per py-aep (MIT).
+    private static string? ReadSourcePath(RifxList pinList)
     {
-        var sb = new StringBuilder();
-        int lastNonNull = -1;
-        for (int i = 0; i < data.Length; i++)
+        var alas = pinList.SublistFind("Als2")?.FindByType("alas");
+        if (alas?.Data is not byte[] bytes || bytes.Length == 0)
+            return null;
+
+        var span = bytes.AsSpan();
+        var end = span.IndexOf((byte)0);
+        if (end >= 0)
+            span = span[..end];
+        if (span.IsEmpty || span[0] != (byte)'{')
+            return null;
+
+        try
         {
-            if (data[i] != 0)
-                lastNonNull = i;
+            using var json = JsonDocument.Parse(span.ToArray());
+            return json.RootElement.ValueKind == JsonValueKind.Object
+                && json.RootElement.TryGetProperty("fullpath", out var fullPath)
+                && fullPath.ValueKind == JsonValueKind.String
+                ? fullPath.GetString()
+                : null;
         }
-        if (lastNonNull < 0)
-            return "";
-        for (int i = 0; i <= lastNonNull; i++)
+        catch (JsonException)
         {
-            sb.Append(data[i] == 0 ? ' ' : (char)data[i]);
+            return null;
         }
-        return sb.ToString();
+    }
+
+    // Vector ("TEXT") opti: the selected source layer name is a NUL-padded UTF-8 field of
+    // 256 bytes at offset 0x44; empty for whole-document footage. Per py-aep's TextOptiChunk.
+    private static string VectorLayerName(byte[] opti) =>
+        opti.Length >= 0x44 + 256 ? NullTerminatedUtf8(opti.AsSpan(0x44, 256)) : "";
+
+    private static string NullTerminatedUtf8(ReadOnlySpan<byte> bytes)
+    {
+        var end = bytes.IndexOf((byte)0);
+        return Encoding.UTF8.GetString(end < 0 ? bytes : bytes[..end]);
+    }
+
+    // Splits on both separators: a project saved on Windows keeps backslash paths.
+    private static string FileNameOf(string path)
+    {
+        var trimmed = path.TrimEnd('/', '\\');
+        var slash = trimmed.LastIndexOfAny(['/', '\\']);
+        return slash < 0 ? trimmed : trimmed[(slash + 1)..];
     }
 }

@@ -87,6 +87,8 @@ public class ItemTests
     {
         var redSolid = _project.RootFolder.FolderContents[2].FolderContents[3];
         Assert.Equal(FootageType.Solid, redSolid.FootageType);
-        Assert.Equal("Red Solid 1", redSolid.Name);
+        // The opti name field holds "Red Solid\01": the bytes after the NUL are left over
+        // from an earlier name. After Effects (and py-aep) read up to the terminator.
+        Assert.Equal("Red Solid", redSolid.Name);
     }
 }

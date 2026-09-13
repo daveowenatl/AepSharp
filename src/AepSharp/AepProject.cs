@@ -9,6 +9,8 @@ public class AepProject
     public AepItem RootFolder { get; internal set; } = null!;
     public Dictionary<uint, AepItem> Items { get; } = new();
 
+    internal EffectDefinitions EffectDefinitions { get; private set; } = new();
+
     public static AepProject Open(string path)
     {
         using var stream = File.OpenRead(path);
@@ -50,6 +52,8 @@ public class AepProject
         var nhedData = nhedBlock.GetBytes();
         project.Depth = (BitsPerChannel)nhedData[15];
 
+        project.EffectDefinitions = EffectDefinitions.FromProject(root);
+
         // Parse root folder
         var rootFolderList = root.SublistFind("Fold");
         if (rootFolderList == null)
@@ -63,8 +67,12 @@ public class AepProject
             {
                 foreach (var layer in item.CompositionLayers)
                 {
-                    if (string.IsNullOrEmpty(layer.Name) && project.Items.TryGetValue(layer.SourceId, out var source))
+                    if (!project.Items.TryGetValue(layer.SourceId, out var source) || layer.SourceId == 0)
+                        continue;
+                    if (string.IsNullOrEmpty(layer.Name))
                         layer.Name = source.Name;
+
+                    layer.ClampSourceDuration = AepLayer.SourceClampDuration(layer, source);
                 }
             }
         }

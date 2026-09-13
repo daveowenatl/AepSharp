@@ -47,16 +47,87 @@ public class AepLayer
     public double OutPoint { get; internal set; }
 
     /// <summary>
-    /// Composition time the layer becomes visible. Assumes 100% time stretch, which
-    /// is not yet decoded.
+    /// Time stretch as a factor (1.0 = 100%, 2.0 = 200% slower, negative = time-reversed),
+    /// from the (s32 dividend at ldta byte 8, u32 divisor at byte 108) pair. A zero or
+    /// missing stretch reads as 1.0, as After Effects treats it.
     /// </summary>
-    public double CompositionInPoint => StartTime + InPoint;
+    public double Stretch { get; internal set; } = 1.0;
 
     /// <summary>
-    /// Composition time the layer stops being visible. Assumes 100% time stretch,
-    /// which is not yet decoded.
+    /// Composition time the layer becomes visible: <c>StartTime + InPoint × Stretch</c>
+    /// (the stored in/out points are in unstretched layer time), clamped as After Effects
+    /// reports it — see <see cref="CompositionOutPoint"/>. For a time-reversed layer
+    /// (negative stretch) the stretched in and out swap, so this is always the earlier of
+    /// the two; py-aep reports them unswapped.
     /// </summary>
-    public double CompositionOutPoint => StartTime + OutPoint;
+    public double CompositionInPoint => Math.Min(StretchedInPoint, StretchedOutPoint);
+
+    /// <summary>
+    /// Composition time the layer stops being visible: <c>StartTime + OutPoint × Stretch</c>.
+    /// For a layer whose source is time-based (video, audio or a composition) with no
+    /// time remapping and a positive stretch, After Effects clamps the in point to
+    /// <see cref="StartTime"/> and the out point to <c>StartTime + source duration × Stretch</c>;
+    /// the same clamp applies here when the layer was parsed as part of a project. Stills,
+    /// solids and sourceless layers are not clamped.
+    /// </summary>
+    public double CompositionOutPoint => Math.Max(StretchedInPoint, StretchedOutPoint);
+
+    /// <summary>
+    /// True when the layer has time remapping enabled (an animated "ADBE Time Remapping"
+    /// property). The source is then not clamped to its duration.
+    /// </summary>
+    public bool TimeRemapEnabled { get; internal set; }
+
+    // Duration of a time-based source, set by the project after all items are parsed;
+    // null when After Effects would not clamp the layer's in/out to its source.
+    internal double? ClampSourceDuration { get; set; }
+
+    /// <summary>
+    /// After Effects clamps a layer's in/out to a time-based source (footage with a
+    /// duration, or a composition) unless time remapping is on or the layer is
+    /// time-reversed. Stills and solids have zero duration. Rule per py-aep's
+    /// AVLayer._should_clamp_times (MIT).
+    /// </summary>
+    internal static double? SourceClampDuration(AepLayer layer, AepItem source) =>
+        source.ItemType is ItemType.Footage or ItemType.Composition
+        && source.DurationSeconds > 0
+        && !layer.TimeRemapEnabled
+        && layer.Stretch >= 0
+            ? source.DurationSeconds
+            : null;
+
+    private double StretchedInPoint => ClampSourceDuration is null
+        ? StartTime + InPoint * Stretch
+        : Math.Max(StartTime + InPoint * Stretch, StartTime);
+
+    private double StretchedOutPoint => ClampSourceDuration is { } duration
+        ? Math.Min(StartTime + OutPoint * Stretch, StartTime + duration * Stretch)
+        : StartTime + OutPoint * Stretch;
+
+    /// <summary>The layer's id, unique within the project (ldta u32 at offset 0).</summary>
+    public uint Id { get; internal set; }
+
+    /// <summary>
+    /// Id (<see cref="Id"/>) of the layer's parent in the same composition, or null when
+    /// the layer has no parent (ldta u32 at offset 132).
+    /// </summary>
+    public uint? ParentLayerId { get; internal set; }
+
+    /// <summary>Blending mode. <see cref="BlendingMode.Normal"/> for layers without one (cameras, lights).</summary>
+    public BlendingMode BlendingMode { get; internal set; }
+
+    /// <summary>How this layer uses a track matte; <see cref="TrackMatteType.None"/> when it has none.</summary>
+    public TrackMatteType TrackMatte { get; internal set; }
+
+    /// <summary>
+    /// Id of the layer used as this layer's track matte (After Effects 2023+, ldta u32 at
+    /// offset 160). Null when the layer has no matte layer or the file predates explicit
+    /// matte layers — there the matte is the layer directly above.
+    /// </summary>
+    public uint? TrackMatteLayerId { get; internal set; }
+
+    /// <summary>True when "Preserve Underlying Transparency" is on.</summary>
+    public bool PreserveTransparency { get; internal set; }
 
     /// <summary>
     /// The layer's Transform group ("ADBE Transform Group"), holding anchor point,
@@ -124,6 +195,24 @@ public class AepLayer
     /// </summary>
     public IReadOnlyList<AepTextRun> TextRuns { get; internal set; } = Array.Empty<AepTextRun>();
 
+    /// <summary>
+    /// Paragraph justification of the text layer's first paragraph, or null for non-text
+    /// layers and documents that don't store one.
+    /// </summary>
+    public TextJustification? TextJustification { get; internal set; }
+
+    /// <summary>True for box (paragraph) text; false for point text and non-text layers.</summary>
+    public bool IsBoxText { get; internal set; }
+
+    /// <summary>The text box [width, height] in layer pixels; null for point text and non-text layers.</summary>
+    public IReadOnlyList<double>? TextBoxSize { get; internal set; }
+
+    /// <summary>
+    /// The text box's top-left corner [x, y] in layer pixels, relative to the layer's
+    /// origin (the anchor of a text layer); null for point text and non-text layers.
+    /// </summary>
+    public IReadOnlyList<double>? TextBoxPosition { get; internal set; }
+
     /// <param name="timeBase">
     /// The containing composition's internal timebase (units per second, cdta offset 8),
     /// used to convert keyframe times. Zero leaves keyframe times unresolved (NaN).
@@ -138,7 +227,9 @@ public class AepLayer
             throw new InvalidDataException("Missing ldta block in layer");
         var ldta = ldtaBlock.GetBytes();
 
+        layer.Id = BinaryPrimitives.ReadUInt32BigEndian(ldta);
         layer.Quality = (LayerQuality)BinaryPrimitives.ReadUInt16BigEndian(ldta.AsSpan(4));
+        ReadCompositingFields(layer, ldta);
 
         // Times are (signed dividend, unsigned divisor) pairs: start at 12, in at 20,
         // out at 28. The divisor is the time base (frame rate × 1000 for comps).
@@ -178,9 +269,12 @@ public class AepLayer
         // Effects
         if (rootTDGP.TryGetValue("ADBE Effect Parade", out var effectsTDGP))
         {
-            var effectsProp = AepProperty.ParseFromList(effectsTDGP, "ADBE Effect Parade");
+            var effectsProp = AepProperty.ParseFromList(effectsTDGP, "ADBE Effect Parade", project?.EffectDefinitions);
             layer.Effects = effectsProp.Properties;
         }
+
+        if (rootTDGP.TryGetValue("ADBE Time Remapping", out var timeRemapTDBS))
+            layer.TimeRemapEnabled = AepProperty.ParseFromList(timeRemapTDBS, "ADBE Time Remapping").IsAnimated;
 
         // Transform
         if (rootTDGP.TryGetValue("ADBE Transform Group", out var transformTDGP))
@@ -201,6 +295,82 @@ public class AepLayer
 
         return layer;
     }
+
+    // ldta layout past the name (bytes 96+), per py-aep's LdtaChunk (MIT): blending mode
+    // u8 at 99, transfer flags at 103 (bit 0 preserve transparency, bit 1 dancing
+    // dissolve), track matte type u8 at 107, stretch divisor u32 at 108 (dividend s32 at
+    // 8), parent layer id u32 at 132, and — in files from After Effects 2023 on — the
+    // matte layer id u32 at 160. Shorter (older or synthetic) ldta blocks keep defaults.
+    private static void ReadCompositingFields(AepLayer layer, byte[] ldta)
+    {
+        if (ldta.Length >= 104)
+        {
+            layer.PreserveTransparency = (ldta[103] & 1) != 0;
+            layer.BlendingMode = ToBlendingMode(ldta[99], dancingDissolve: (ldta[103] & (1 << 1)) != 0);
+        }
+        if (ldta.Length >= 108)
+            layer.TrackMatte = ldta[107] <= (byte)TrackMatteType.LumaInverted ? (TrackMatteType)ldta[107] : TrackMatteType.None;
+        if (ldta.Length >= 112)
+        {
+            var dividend = BinaryPrimitives.ReadInt32BigEndian(ldta.AsSpan(8));
+            var divisor = BinaryPrimitives.ReadUInt32BigEndian(ldta.AsSpan(108));
+            if (dividend != 0 && divisor != 0)
+                layer.Stretch = (double)dividend / divisor;
+        }
+        if (ldta.Length >= 136)
+        {
+            var parent = BinaryPrimitives.ReadUInt32BigEndian(ldta.AsSpan(132));
+            layer.ParentLayerId = parent == 0 ? null : parent;
+        }
+        if (ldta.Length >= 164)
+        {
+            var matte = BinaryPrimitives.ReadUInt32BigEndian(ldta.AsSpan(160));
+            layer.TrackMatteLayerId = matte == 0 ? null : matte;
+        }
+    }
+
+    // The stored value is the After Effects SDK PF_Xfer transfer mode; mapping per
+    // py-aep's _BLENDING_MODE_BINARY_MAP. 0 appears on cameras, lights and nulls.
+    internal static BlendingMode ToBlendingMode(byte raw, bool dancingDissolve = false) => raw switch
+    {
+        3 => dancingDissolve ? BlendingMode.DancingDissolve : BlendingMode.Dissolve,
+        4 => BlendingMode.Add,
+        5 => BlendingMode.Multiply,
+        6 => BlendingMode.Screen,
+        7 => BlendingMode.Overlay,
+        8 => BlendingMode.SoftLight,
+        9 => BlendingMode.HardLight,
+        10 => BlendingMode.Darken,
+        11 => BlendingMode.Lighten,
+        12 => BlendingMode.ClassicDifference,
+        13 => BlendingMode.Hue,
+        14 => BlendingMode.Saturation,
+        15 => BlendingMode.Color,
+        16 => BlendingMode.Luminosity,
+        17 => BlendingMode.StencilAlpha,
+        18 => BlendingMode.StencilLuma,
+        19 => BlendingMode.SilhouetteAlpha,
+        20 => BlendingMode.SilhouetteLuma,
+        21 => BlendingMode.LuminescentPremul,
+        22 => BlendingMode.AlphaAdd,
+        23 => BlendingMode.ClassicColorDodge,
+        24 => BlendingMode.ClassicColorBurn,
+        25 => BlendingMode.Exclusion,
+        26 => BlendingMode.Difference,
+        27 => BlendingMode.ColorDodge,
+        28 => BlendingMode.ColorBurn,
+        29 => BlendingMode.LinearDodge,
+        30 => BlendingMode.LinearBurn,
+        31 => BlendingMode.LinearLight,
+        32 => BlendingMode.VividLight,
+        33 => BlendingMode.PinLight,
+        34 => BlendingMode.HardMix,
+        35 => BlendingMode.LighterColor,
+        36 => BlendingMode.DarkerColor,
+        37 => BlendingMode.Subtract,
+        38 => BlendingMode.Divide,
+        _ => BlendingMode.Normal,
+    };
 
     private static void AssignTimeBase(AepProperty? property, uint timeBase)
     {
@@ -241,6 +411,12 @@ public class AepLayer
                 layer.SourceText = document.Text;
                 layer.Fonts = document.Fonts;
                 layer.TextRuns = BuildTextRuns(document);
+                layer.TextJustification = document.Justification is >= 0 and <= (int)AepSharp.TextJustification.FullJustifyLastLineFull
+                    ? (TextJustification)document.Justification.Value
+                    : null;
+                layer.IsBoxText = document.IsBoxText;
+                layer.TextBoxSize = document.BoxSize;
+                layer.TextBoxPosition = document.BoxPosition;
                 return;
             }
         }
@@ -268,6 +444,8 @@ public class AepLayer
                 FontSize = run.FontSize,
                 FillColor = run.Fill,
                 StrokeColor = run.Stroke,
+                Tracking = run.Tracking,
+                Leading = run.Leading,
             });
         }
         return runs;

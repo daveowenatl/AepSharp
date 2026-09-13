@@ -21,4 +21,14 @@ public sealed class AepTextRun
 
     /// <summary>Stroke colour as RGB components in 0..1, or null if absent.</summary>
     public IReadOnlyList<double>? StrokeColor { get; internal set; }
+
+    /// <summary>Tracking in thousandths of an em (After Effects' Tracking field), or null if absent.</summary>
+    public double? Tracking { get; internal set; }
+
+    /// <summary>
+    /// Line spacing in points. With auto leading on (the default) this is the font size ×
+    /// the paragraph's auto-leading factor (120% by default); otherwise the explicit
+    /// leading. Null if absent.
+    /// </summary>
+    public double? Leading { get; internal set; }
 }

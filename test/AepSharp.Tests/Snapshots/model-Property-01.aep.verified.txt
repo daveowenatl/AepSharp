@@ -44,7 +44,11 @@
                     Label: ,
                     Index: 1,
                     PropertyType: Boolean,
+                    Value: [
+                      0.0
+                    ],
                     IsAnimated: false,
+                    Dimensions: 1,
                     IsSpatial: false,
                     ExpressionEnabled: false
                   }
@@ -66,7 +70,11 @@
                     Label: ,
                     Index: 1,
                     PropertyType: OneD,
+                    Value: [
+                      0.0
+                    ],
                     IsAnimated: false,
+                    Dimensions: 1,
                     IsSpatial: false,
                     ExpressionEnabled: false
                   }
@@ -88,7 +96,12 @@
                     Label: ,
                     Index: 1,
                     PropertyType: TwoD,
+                    Value: [
+                      0.5,
+                      0.5
+                    ],
                     IsAnimated: false,
+                    Dimensions: 2,
                     IsSpatial: false,
                     ExpressionEnabled: false
                   }
@@ -132,7 +145,14 @@
                     Label: ,
                     Index: 1,
                     PropertyType: Color,
+                    Value: [
+                      255.0,
+                      255.0,
+                      0.0,
+                      0.0
+                    ],
                     IsAnimated: false,
+                    Dimensions: 4,
                     IsSpatial: false,
                     ExpressionEnabled: false
                   }
@@ -154,7 +174,11 @@
                     Label: ,
                     Index: 1,
                     PropertyType: Angle,
+                    Value: [
+                      0.0
+                    ],
                     IsAnimated: false,
+                    Dimensions: 1,
                     IsSpatial: false,
                     ExpressionEnabled: false
                   }
@@ -176,8 +200,10 @@
                     Label: ,
                     Index: 1,
                     IsAnimated: false,
+                    Dimensions: 1,
                     IsSpatial: false,
-                    ExpressionEnabled: false
+                    ExpressionEnabled: false,
+                    LayerReferenceId: 14
                   }
                 ],
                 IsAnimated: false,
@@ -186,7 +212,11 @@
               }
             ],
             OutPoint: 60.0,
+            Stretch: 1.0,
             CompositionOutPoint: 60.0,
+            TimeRemapEnabled: false,
+            Id: 14,
+            PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
               Name: ADBE Transform Group,
@@ -277,7 +307,8 @@
               IsAnimated: false,
               IsSpatial: false,
               ExpressionEnabled: false
-            }
+            },
+            IsBoxText: false
           },
           {
             Index: 2,
@@ -337,7 +368,11 @@
               ExpressionEnabled: false
             },
             OutPoint: 60.0,
+            Stretch: 1.0,
             CompositionOutPoint: 60.0,
+            TimeRemapEnabled: false,
+            Id: 15,
+            PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
               Name: ADBE Transform Group,
@@ -449,9 +484,13 @@
                   0.0,
                   0.0,
                   0.0
-                ]
+                ],
+                Tracking: 0.0,
+                Leading: 222.0
               }
-            ]
+            ],
+            TextJustification: Center,
+            IsBoxText: false
           }
         ]
       },

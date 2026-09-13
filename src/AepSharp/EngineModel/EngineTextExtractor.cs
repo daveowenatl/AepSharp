@@ -19,6 +19,18 @@ internal sealed class EngineTextDocument
     /// when the copy mixes styles.
     /// </summary>
     public IReadOnlyList<EngineStyledRun> StyledRuns { get; init; } = Array.Empty<EngineStyledRun>();
+
+    /// <summary>First paragraph's justification code (0..6), or null if absent.</summary>
+    public int? Justification { get; init; }
+
+    /// <summary>True when the layer's text frame is a box (paragraph text).</summary>
+    public bool IsBoxText { get; init; }
+
+    /// <summary>Box [width, height], or null for point text / an incomplete outline.</summary>
+    public IReadOnlyList<double>? BoxSize { get; init; }
+
+    /// <summary>Box top-left [x, y] in layer coordinates, or null for point text.</summary>
+    public IReadOnlyList<double>? BoxPosition { get; init; }
 }
 
 /// <summary>One styled span of text within a document (a StyleRun entry).</summary>
@@ -36,6 +48,15 @@ internal sealed class EngineStyledRun
 
     /// <summary>Stroke colour as RGB components in 0..1, or null if absent.</summary>
     public IReadOnlyList<double>? Stroke { get; init; }
+
+    /// <summary>Tracking in thousandths of an em, or null if absent.</summary>
+    public double? Tracking { get; init; }
+
+    /// <summary>
+    /// Line spacing in points: the explicit leading, or font size × the first
+    /// paragraph's auto-leading factor while auto leading is on. Null when absent.
+    /// </summary>
+    public double? Leading { get; init; }
 }
 
 /// <summary>
@@ -63,13 +84,63 @@ internal static class EngineTextExtractor
             }
         }
 
+        var paragraphStyle = FirstParagraphStyle(runArray);
+        var outline = BoxOutline(top, out var isBoxText);
         return new EngineTextDocument
         {
             Runs = runs,
             Text = string.Concat(runs).TrimEnd('\r', '\n', ' ', '\t'),
             Fonts = ExtractFonts(top),
-            StyledRuns = ExtractStyledRuns(runArray),
+            StyledRuns = ExtractStyledRuns(runArray, paragraphStyle),
+            Justification = paragraphStyle?.Get(EngineDataSchema.Justification) is EngineNumber j ? (int)j.Value : null,
+            IsBoxText = isBoxText,
+            BoxSize = outline is null ? null : [Math.Abs(outline[12] - outline[0]), Math.Abs(outline[13] - outline[1])],
+            BoxPosition = outline is null ? null : [outline[0], outline[1]],
         };
+    }
+
+    /// <summary>
+    /// The first document entry's first paragraph style, at
+    /// <c>/0/5/0[0]/0/0/5</c> of the run entry (path per py-aep's text parser).
+    /// </summary>
+    private static EngineDict? FirstParagraphStyle(EngineArray runArray)
+    {
+        if (runArray.Items.Count == 0
+            || runArray.Items[0] is not EngineDict run
+            || run.Get(EngineDataSchema.Entry) is not EngineDict inner
+            || inner.Get(EngineDataSchema.ParagraphRun) is not EngineDict paragraphRun
+            || paragraphRun.Get(EngineDataSchema.Entry) is not EngineArray { Items.Count: > 0 } spans
+            || spans.Items[0] is not EngineDict span
+            || span.Get(EngineDataSchema.Entry) is not EngineDict holder
+            || holder.Get(EngineDataSchema.Entry) is not EngineDict holder2)
+            return null;
+        return holder2.Get(EngineDataSchema.ParagraphRun) as EngineDict;
+    }
+
+    /// <summary>
+    /// The layer's text frame lives in the resource dict at <c>/0/8/0[0]/0</c>. A box
+    /// (paragraph) text frame carries a <c>/1</c> dict whose <c>/0</c> is the box outline
+    /// as a flat [x, y, ...] array of 16 vertices tracing the corners with repeats (vertex
+    /// 0 is the top-left, vertex 6 the bottom-right); point text has none. Size is
+    /// |v6 − v0| and position is v0, as py-aep computes them (needs at least 7 vertices).
+    /// </summary>
+    private static double[]? BoxOutline(EngineDict top, out bool isBoxText)
+    {
+        isBoxText = false;
+        if (top.Get(EngineDataSchema.ResourceDict) is not EngineDict resource
+            || resource.Get(EngineDataSchema.FrameSet) is not EngineDict frameSet
+            || frameSet.Get(EngineDataSchema.Entry) is not EngineArray { Items.Count: > 0 } frames
+            || frames.Items[0] is not EngineDict frameEntry
+            || frameEntry.Get(EngineDataSchema.Entry) is not EngineDict frame
+            || frame.Get(EngineDataSchema.FrameBox) is not EngineDict box)
+            return null;
+
+        isBoxText = true;
+        if (box.Get(EngineDataSchema.BoxOutline) is not EngineArray coords
+            || coords.Items.Count < 14
+            || !coords.Items.All(c => c is EngineNumber))
+            return null;
+        return coords.Items.Cast<EngineNumber>().Select(n => n.Value).ToArray();
     }
 
     /// <summary>
@@ -77,7 +148,7 @@ internal static class EngineTextExtractor
     /// spans). Each span's /1 is its length in the entry's text; its style dict is at
     /// /0/0/6 (font index /0, size /1, fill /53/0/1, stroke /54/0/1 as ARGB).
     /// </summary>
-    private static List<EngineStyledRun> ExtractStyledRuns(EngineArray runArray)
+    private static List<EngineStyledRun> ExtractStyledRuns(EngineArray runArray, EngineDict? paragraphStyle)
     {
         var result = new List<EngineStyledRun>();
         foreach (var item in runArray.Items)
@@ -107,17 +178,36 @@ internal static class EngineTextExtractor
                     ? inner2.Get(EngineDataSchema.StyleRun) as EngineDict
                     : null;
 
+                var fontSize = (style?.Get(EngineDataSchema.FontSize) as EngineNumber)?.Value;
                 result.Add(new EngineStyledRun
                 {
                     Text = slice.TrimEnd('\r', '\n'),
                     FontIndex = style?.Get(EngineDataSchema.FontIndex) is EngineNumber fi ? (int)fi.Value : null,
-                    FontSize = (style?.Get(EngineDataSchema.FontSize) as EngineNumber)?.Value,
+                    FontSize = fontSize,
+                    Tracking = (style?.Get(EngineDataSchema.Tracking) as EngineNumber)?.Value,
+                    Leading = style is null ? null : Leading(style, fontSize, paragraphStyle),
                     Fill = style is null ? null : Color(style, EngineDataSchema.FillColor),
                     Stroke = style is null ? null : Color(style, EngineDataSchema.StrokeColor),
                 });
             }
         }
         return result;
+    }
+
+    // With auto leading on (the default), After Effects stores a sentinel in the explicit
+    // leading key and displays font size × the paragraph's auto-leading factor (1.2 by
+    // default). Per py-aep's TextDocument.leading.
+    private static double? Leading(EngineDict style, double? fontSize, EngineDict? paragraphStyle)
+    {
+        if (style.Get(EngineDataSchema.Leading) is not EngineNumber explicitLeading)
+            return null;
+        var auto = style.Get(EngineDataSchema.AutoLeading) is not EngineBoolean { Value: false };
+        if (auto && paragraphStyle is not null && fontSize is not null)
+        {
+            var factor = (paragraphStyle.Get(EngineDataSchema.AutoLeadingFactor) as EngineNumber)?.Value ?? 1.2;
+            return fontSize * factor;
+        }
+        return explicitLeading.Value;
     }
 
     private static string Slice(string text, int start, int length)
