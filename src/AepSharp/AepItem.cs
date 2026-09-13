@@ -26,6 +26,9 @@ public class AepItem
     /// not JSON (older binary aliases).
     /// </summary>
     public string? SourcePath { get; internal set; }
+
+    /// <summary>A solid's colour as RGB 0-1; null for other items. Three big-endian f32s at 14 in the opti block, per py-aep's SoliOptiChunk.</summary>
+    public IReadOnlyList<double>? SolidColor { get; internal set; }
     public byte[] BackgroundColor { get; internal set; } = new byte[3];
     public List<AepLayer> CompositionLayers { get; internal set; } = new();
 
@@ -107,6 +110,8 @@ public class AepItem
                         {
                             case FootageType.Solid:
                                 {
+                                    if (optiData.Length >= 26)
+                                        item.SolidColor = [BinaryPrimitives.ReadSingleBigEndian(optiData.AsSpan(14)), BinaryPrimitives.ReadSingleBigEndian(optiData.AsSpan(18)), BinaryPrimitives.ReadSingleBigEndian(optiData.AsSpan(22))];
                                     // NUL-terminated: bytes after the terminator can be stale
                                     // leftovers of an earlier, longer name.
                                     var end = Math.Min(26 + 256, optiData.Length);

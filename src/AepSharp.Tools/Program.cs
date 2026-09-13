@@ -258,7 +258,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
 
         var footage = project.Items.Values
             .Where(i => i.ItemType == ItemType.Footage)
-            .Select(f => new { f.Id, f.Name, f.Width, f.Height, Type = f.FootageType.ToString(), Duration = f.DurationSeconds, f.SourcePath })
+            .Select(f => new { f.Id, f.Name, f.Width, f.Height, Type = f.FootageType.ToString(), Duration = f.DurationSeconds, f.SourcePath, f.SolidColor })
             .ToList();
 
         Console.Out.Write(System.Text.Json.JsonSerializer.Serialize(new { File = Path.GetFileName(settings.File), Compositions = compositions, Footage = footage }, JsonOptions));

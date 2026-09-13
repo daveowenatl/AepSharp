@@ -98,7 +98,7 @@ Reads:
 - Project metadata (expression engine, bit depth)
 - The folder and item tree
 - Compositions: dimensions, frame rate, duration, background color
-- Footage: dimensions, frame rate, duration, type (image, audio/video, vector,
+- Footage: dimensions, frame rate, duration, solid colour, type (image, audio/video, vector,
   Photoshop, solid, placeholder), source file path
 - Layers: type (AV, text, shape, camera, light), null, flags, quality, sampling and frame-blend modes, source, parent,
   start/in/out times, time stretch, blending mode, track matte and matte layer

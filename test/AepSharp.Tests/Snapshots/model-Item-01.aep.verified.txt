@@ -299,6 +299,11 @@
             Width: 1920,
             Height: 1080,
             FootageType: Solid,
+            SolidColor: [
+              0.0,
+              0.0,
+              1.0
+            ],
             BackgroundColor: AAAA
           },
           {
@@ -308,6 +313,11 @@
             Width: 1920,
             Height: 1080,
             FootageType: Solid,
+            SolidColor: [
+              0.0,
+              1.0,
+              0.0
+            ],
             BackgroundColor: AAAA
           },
           {
@@ -328,6 +338,11 @@
             Width: 1920,
             Height: 1080,
             FootageType: Solid,
+            SolidColor: [
+              1.0,
+              0.0,
+              0.0
+            ],
             BackgroundColor: AAAA
           }
         ],
@@ -344,6 +359,11 @@
             Width: 100,
             Height: 100,
             FootageType: Solid,
+            SolidColor: [
+              1.0,
+              1.0,
+              1.0
+            ],
             BackgroundColor: AAAA
           }
         ],

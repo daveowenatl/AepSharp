@@ -542,6 +542,11 @@
             Width: 100,
             Height: 100,
             FootageType: Solid,
+            SolidColor: [
+              1.0,
+              1.0,
+              1.0
+            ],
             BackgroundColor: AAAA
           }
         ],
