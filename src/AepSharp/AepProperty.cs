@@ -124,13 +124,16 @@ public class AepProperty
     }
 
     // Animated properties carry a "list" LIST whose lhd3 header holds the keyframe
-    // count as a big-endian u16 at offset 10.
+    // count as a big-endian u32 at offset 8 (and each keyframe's byte size as a u32
+    // at offset 16; count × size equals the ldat payload length across a 181-file
+    // production corpus).
     private static int DecodeKeyframeCount(RifxList tdbs)
     {
         var lhd3 = tdbs.SublistFind("list")?.FindByType("lhd3")?.GetBytes();
         if (lhd3 is null || lhd3.Length < 12)
             return 0;
-        return BinaryPrimitives.ReadUInt16BigEndian(lhd3.AsSpan(10));
+        var count = BinaryPrimitives.ReadUInt32BigEndian(lhd3.AsSpan(8));
+        return count > int.MaxValue ? 0 : (int)count;
     }
 
     internal static AepProperty ParseFromBlocks(List<object> entries, string matchName)
