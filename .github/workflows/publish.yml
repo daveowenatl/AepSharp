@@ -1,0 +1,39 @@
+name: Publish NuGet package
+
+# Push a tag like v0.2.0 (matching <Version> in src/AepSharp/AepSharp.csproj) to publish.
+on:
+  push:
+    tags: [ 'v*' ]
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DiffEngine_Disabled: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Check tag matches package version
+        run: |
+          version=$(grep -oPm1 '(?<=<Version>)[^<]+' src/AepSharp/AepSharp.csproj)
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME doesn't match <Version>$version"; exit 1; }
+
+      - name: Test
+        run: dotnet test --configuration Release
+
+      - name: Pack
+        run: dotnet pack src/AepSharp/AepSharp.csproj --configuration Release --output artifacts
+
+      - name: Push to nuget.org
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate

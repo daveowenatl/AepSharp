@@ -167,4 +167,12 @@ record layouts, and keyframe interpolation, follow [py-aep](https://github.com/f
 
 ## License
 
-[MIT](LICENSE). © 2026 Dave Owen, © 2020 Boltframe.
+[MIT](LICENSE). © 2026 Dave Owen, © 2020 Boltframe. Ported MIT-licensed work from py-aep
+(© 2023 Fortiche production) and lottie-web (© 2015 Bodymovin) is listed in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+## Package
+
+`dotnet add package AepSharp` (net8.0, net9.0, net10.0). Releases are published by pushing a
+`v<version>` tag that matches `<Version>` in `src/AepSharp/AepSharp.csproj`; the `publish` workflow
+tests, packs and pushes to nuget.org (needs the `NUGET_API_KEY` repository secret).

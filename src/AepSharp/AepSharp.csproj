@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -9,9 +9,9 @@
   <!-- NuGet package metadata -->
   <PropertyGroup>
     <PackageId>AepSharp</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>Dave Owen</Authors>
-    <Description>A native C# parser for Adobe After Effects (.aep) project files. Reads project structure, compositions, footage items, layers, and effect/text properties from the RIFX binary format — no After Effects install or ExtendScript required. A port of boltframe/aftereffects-aep-parser.</Description>
+    <Description>A native C# reader for Adobe After Effects (.aep) project files: compositions, footage, layers, transforms with keyframes and interpolation, effects, masks, shape contents, text documents and styles, and expressions, from the RIFX binary format. No After Effects install or ExtendScript required. Builds on boltframe/aftereffects-aep-parser and py-aep (MIT).</Description>
     <PackageTags>after-effects;aep;adobe;parser;rifx;riff;nexrender;motion-graphics</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -31,6 +31,8 @@
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,13 +1,32 @@
-MIT License
+# Third-party notices
 
-Copyright (c) 2026 Dave Owen
+AepSharp builds on the following MIT-licensed work. Their copyright and permission notices are
+reproduced here as the MIT License requires.
+
+## boltframe/aftereffects-aep-parser
+
+AepSharp began as a C# port of <https://github.com/boltframe/aftereffects-aep-parser>
+(RIFX reader, project, item and layer parsing).
+
 Copyright (c) 2020 Boltframe
 
-AepSharp is a C# port of boltframe/aftereffects-aep-parser
-(https://github.com/boltframe/aftereffects-aep-parser), which is also MIT
-licensed. The original copyright notice is retained above as required.
-AepSharp also ports MIT-licensed work from py-aep and, through it, lottie-web;
-their notices are in THIRD-PARTY-NOTICES.md.
+## forticheprod/py-aep
+
+Record layouts and resolution rules ported from <https://github.com/forticheprod/py-aep>: keyframe
+decoding and interpolation, effect definitions, mask atoms, text documents and styles (including
+font caps), property flags (enabled, dimensions separated), anchor point normalisation, and
+layer timing.
+
+Copyright (c) 2023 Fortiche production
+
+## airbnb/lottie-web
+
+py-aep's keyframe interpolation, which AepSharp ports, is itself ported from
+<https://github.com/airbnb/lottie-web>.
+
+Copyright (c) 2015 Bodymovin
+
+## MIT License (applies to each notice above)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
