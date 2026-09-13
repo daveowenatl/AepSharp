@@ -83,6 +83,14 @@ public class AepLayer
     public double CompositionOutPoint => Math.Max(StretchedInPoint, StretchedOutPoint);
 
     /// <summary>
+    /// The layer's out point as stored, before the clamp to its source's duration:
+    /// <c>StartTime + OutPoint × Stretch</c> (the later of the stretched in and out for a
+    /// time-reversed layer). After Effects re-applies the clamp against whatever the source
+    /// is, so when footage is replaced with a longer file the layer plays up to this point.
+    /// </summary>
+    public double UnclampedCompositionOutPoint => Math.Max(StartTime + InPoint * Stretch, StartTime + OutPoint * Stretch);
+
+    /// <summary>
     /// True when the layer has time remapping enabled (an animated "ADBE Time Remapping"
     /// property). The source is then not clamped to its duration.
     /// </summary>

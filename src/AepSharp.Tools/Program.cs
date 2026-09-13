@@ -289,6 +289,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
             layer.GuideEnabled,
             In = layer.CompositionInPoint,
             Out = layer.CompositionOutPoint,
+            OutUnclamped = Math.Abs(layer.UnclampedCompositionOutPoint - layer.CompositionOutPoint) > 1e-9 ? layer.UnclampedCompositionOutPoint : (double?)null,
             layer.StartTime,
             Stretch = layer.Stretch == 1.0 ? (double?)null : layer.Stretch,
             BlendingMode = layer.BlendingMode.ToString(),

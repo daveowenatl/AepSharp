@@ -188,6 +188,7 @@ public class LayerCompositingTests
 
         Assert.Equal(27.0, layer.CompositionInPoint, 9);
         Assert.Equal(32.0, layer.CompositionOutPoint, 9);
+        Assert.Equal(57.0, layer.UnclampedCompositionOutPoint, 9);
     }
 
     [Fact]
