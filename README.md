@@ -37,10 +37,36 @@ foreach (var item in project.Items.Values)
 
 An `AepItem` has `Name`, `Id`, `ItemType` (`Folder`, `Composition`, or `Footage`),
 and for comps and footage, `Width`, `Height`, `Framerate`, `DurationSeconds`,
-`FootageType`, and `CompositionLayers`. An `AepLayer` carries its index, name, source
-id, quality and blend modes, the layer flags (3D, solo, shy, locked, adjustment, and
-the rest), its timing (`StartTime`, `CompositionInPoint`, `CompositionOutPoint`), its
-`Transform`, `Effects` and `Text` property trees, and the text copy and styled runs.
+`FootageType`, `SourcePath` (the footage file) and `CompositionLayers`. An `AepLayer`
+carries its index, id, name, source id, parent id, quality, the layer flags (3D, solo,
+shy, locked, adjustment, and the rest), compositing (`BlendingMode`, `TrackMatte`,
+`TrackMatteLayerId`, `PreserveTransparency`), its timing (`StartTime`, `Stretch`,
+`CompositionInPoint`, `CompositionOutPoint`), its `Transform`, `Effects` and `Text`
+property trees, and the text copy, layout and styled runs.
+
+### Effects and text layout
+
+```csharp
+// Effect parameters carry their current value (or keyframes when animated)
+var resize = layer.Effects.First(e => e.Name == "Single Line Resize");
+var maxWidth = resize.Properties.First(p => p.Name == "Maximum width").Value[0];
+
+// Text layout
+if (layer.IsBoxText)
+    Console.WriteLine($"{layer.TextJustification} box {layer.TextBoxSize[0]}x{layer.TextBoxSize[1]} at {layer.TextBoxPosition[0]},{layer.TextBoxPosition[1]}");
+var run = layer.TextRuns[0];   // FontName, FontSize, FillColor, Tracking, Leading
+```
+
+Effect parameter values are exposed as the file stores them: sliders, angles (degrees)
+and integers as numbers, checkboxes 0/1, popups as a 1-based option index, colours as
+ARGB 0–255, and 2D points as fractions of the layer size. Layer references expose the
+referenced layer's `Id` as `LayerReferenceId`. Parameters left untouched keep the value
+recorded in the effect definition.
+
+`CompositionInPoint`/`CompositionOutPoint` apply time stretch (`StartTime + InPoint ×
+Stretch`) and, like After Effects, clamp layers of time-based footage and precomps to
+their source duration (unless time remapping is on). Time-reversed layers report the
+earlier time as the in point.
 
 ### Transforms and keyframes
 
@@ -72,18 +98,25 @@ Reads:
 - Project metadata (expression engine, bit depth)
 - The folder and item tree
 - Compositions: dimensions, frame rate, duration, background color
-- Footage: dimensions, frame rate, duration, solid or placeholder
-- Layers: flags, quality, sampling and frame-blend modes, source, start/in/out times
+- Footage: dimensions, frame rate, duration, type (image, audio/video, vector,
+  Photoshop, solid, placeholder), source file path
+- Layers: flags, quality, sampling and frame-blend modes, source, parent,
+  start/in/out times, time stretch, blending mode, track matte and matte layer
 - Transform values (anchor point, position, scale, rotation, opacity)
 - Keyframes for numeric properties, with After Effects-style interpolation
 - Expression source and whether it's enabled
-- Effect and text property names and structure; text copy, fonts and styled runs
+- Effects: names and parameters with their current values or keyframes (including
+  repeat instances that share the project's effect definitions), layer references
+- Text: copy, fonts, styled runs (size, colours, tracking, leading), paragraph
+  justification, point vs. box text with box size and position
 
 Doesn't read (yet):
 
 - Masks, markers, shape layer contents
-- Time stretch, paragraph justification and box text layout
+- Mask-reference, 3D-point and curve effect parameters (no value)
 - Separated dimensions (`Position_0`/`Position_1`) as a combined value
+- Time stretch when sampling keyframes (`TransformValueAt` assumes 100%)
+- Per-paragraph justification beyond the first paragraph
 - Linear keyframes on bent spatial paths follow a straight line (as py-aep does)
 
 To find where an unparsed field lives in the binary, use `aepdump`.
@@ -94,21 +127,26 @@ CLI for inspecting files:
 
 ```bash
 dotnet run --project src/AepSharp.Tools -- tree template.aep          # comps, layers, text copy
-dotnet run --project src/AepSharp.Tools -- scene template.aep         # JSON: timing, transforms, keyframes, text
+dotnet run --project src/AepSharp.Tools -- scene template.aep         # JSON: timing, compositing, transforms, keyframes, effects, text
 dotnet run --project src/AepSharp.Tools -- scene template.aep --bake  # plus per-frame animated values
 dotnet run --project src/AepSharp.Tools -- rifx template.aep --format json
 ```
 
 `rifx` prints each chunk with its absolute offset, FourCC, declared vs. actual size, a
 hex/ascii preview, and a flag if it looks truncated or overflowing. `scene` is meant as
-input for renderers and template tooling.
+input for renderers and template tooling: footage with `sourcePath`; layers with
+`blendingMode`, `trackMatte`, `stretch`, each effect's `parameters` (`name`, `value`,
+and keyframes/baked frames when animated); text with `justification`, `boxText`,
+`boxSize` and `boxPosition`.
 
 ## Tested against
 
 A set of real `.aep` fixtures (After Effects around 2022), plus a corpus of 181
 production templates. Keyframe decoding and interpolation match py-aep on every
 animated transform property in that corpus, and keyframed positions match frames
-rendered by After Effects. If a file reads wrong, open an issue with the `aepdump`
+rendered by After Effects. Footage paths, layer blending/matte/stretch/timing, text
+justification and box geometry, and effect parameter values are differentially tested
+against py-aep over the same corpus. If a file reads wrong, open an issue with the `aepdump`
 output.
 
 ## Credits
@@ -117,7 +155,8 @@ Port of [boltframe/aftereffects-aep-parser](https://github.com/boltframe/afteref
 (MIT). The format reverse-engineering is theirs; their README has the research notes
 and a Kaitai definition.
 
-Keyframe record layouts and interpolation follow [py-aep](https://github.com/forticheprod/py-aep)
+Keyframe, layer (`ldta`), effect parameter (`pard`), footage alias and text layout
+record layouts, and keyframe interpolation, follow [py-aep](https://github.com/forticheprod/py-aep)
 (MIT), whose interpolation is ported from [lottie-web](https://github.com/airbnb/lottie-web) (MIT).
 
 ## License

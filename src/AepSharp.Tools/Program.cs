@@ -8,8 +8,8 @@ using Spectre.Console.Cli;
 //   aepdump <file.aep>            pretty project tree (comps, layers, text copy)
 //   aepdump tree <file.aep>       (same, explicit)
 //   aepdump rifx <file.aep>       raw RIFX chunk tree with offsets/sizes
-//   aepdump scene <file.aep>      compositions, layers, timing, transforms, keyframes and text as JSON
-//                  [--bake]         plus per-frame values of animated transform properties
+//   aepdump scene <file.aep>      compositions, layers, timing, transforms, keyframes, effects and text as JSON
+//                  [--bake]         plus per-frame values of animated transform and effect properties
 
 var app = new CommandApp<TreeCommand>();
 app.Configure(config =>
@@ -18,7 +18,7 @@ app.Configure(config =>
     config.AddCommand<TreeCommand>("tree")
         .WithDescription("Print the parsed project model (comps, layers, text copy) as a tree.");
     config.AddCommand<SceneCommand>("scene")
-        .WithDescription("Print compositions, layers, timing, transforms and text as JSON (for renderers and tooling).");
+        .WithDescription("Print compositions, layers, timing, transforms, effects and text as JSON (for renderers and tooling).");
     config.AddCommand<RifxCommand>("rifx")
         .WithDescription("Print the raw RIFX chunk tree with absolute offsets and sizes.");
 });
@@ -207,14 +207,15 @@ internal sealed class SceneSettings : CommandSettings
     public string File { get; init; } = "";
 
     [CommandOption("--bake")]
-    [Description("Also emit per-frame values for animated transform properties over each layer's visible range")]
+    [Description("Also emit per-frame values for animated transform and effect properties over each layer's visible range")]
     public bool Bake { get; init; }
 }
 
 /// <summary>
 /// Emits a renderer-oriented JSON view of the project: every composition with its
-/// layers' timing (composition time), static transform values, animated
-/// properties, source item and text runs. Transform values absent from the output
+/// layers' timing (composition time), compositing (blend mode, track matte, stretch),
+/// static transform values, animated properties, effect parameters, source item and
+/// text layout and runs; plus footage with source paths. Transform values absent from the output
 /// are at their After Effects defaults.
 /// </summary>
 internal sealed class SceneCommand : Command<SceneSettings>
@@ -257,7 +258,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
 
         var footage = project.Items.Values
             .Where(i => i.ItemType == ItemType.Footage)
-            .Select(f => new { f.Id, f.Name, f.Width, f.Height, Type = f.FootageType.ToString(), Duration = f.DurationSeconds })
+            .Select(f => new { f.Id, f.Name, f.Width, f.Height, Type = f.FootageType.ToString(), Duration = f.DurationSeconds, f.SourcePath })
             .ToList();
 
         Console.Out.Write(System.Text.Json.JsonSerializer.Serialize(new { File = Path.GetFileName(settings.File), Compositions = compositions, Footage = footage }, JsonOptions));
@@ -279,6 +280,12 @@ internal sealed class SceneCommand : Command<SceneSettings>
             In = layer.CompositionInPoint,
             Out = layer.CompositionOutPoint,
             layer.StartTime,
+            Stretch = layer.Stretch == 1.0 ? (double?)null : layer.Stretch,
+            BlendingMode = layer.BlendingMode.ToString(),
+            TrackMatte = layer.TrackMatte == TrackMatteType.None ? null : layer.TrackMatte.ToString(),
+            TrackMatteLayerId = layer.TrackMatteLayerId,
+            ParentLayerId = layer.ParentLayerId,
+            layer.Id,
             Transform = new
             {
                 Anchor = layer.AnchorPoint,
@@ -289,14 +296,35 @@ internal sealed class SceneCommand : Command<SceneSettings>
             },
             Animated = layer.Transform?.Properties.Where(p => p.IsAnimated)
                 .Select(p => Animated(composition, layer, p, bake)).ToList() is { Count: > 0 } animated ? animated : null,
-            Effects = layer.Effects.Count > 0 ? layer.Effects.Select(e => e.MatchName).ToList() : null,
+            Effects = layer.Effects.Count > 0 ? layer.Effects.Select(e => Effect(composition, layer, e, bake)).ToList() : null,
             Text = layer.SourceText is null ? null : new
             {
                 Content = layer.SourceText,
-                Runs = layer.TextRuns.Select(r => new { r.Text, Font = r.FontName, Size = r.FontSize, Fill = r.FillColor, Stroke = r.StrokeColor }).ToList(),
+                Justification = layer.TextJustification?.ToString(),
+                BoxText = layer.IsBoxText,
+                BoxSize = layer.TextBoxSize,
+                BoxPosition = layer.TextBoxPosition,
+                Runs = layer.TextRuns.Select(r => new { r.Text, Font = r.FontName, Size = r.FontSize, Fill = r.FillColor, Stroke = r.StrokeColor, r.Tracking, r.Leading }).ToList(),
             },
         };
     }
+
+    // Effect parameter values are emitted as stored: sliders and angles as numbers,
+    // checkboxes 0/1, popups as 1-based indices, colours ARGB 0-255, points as fractions
+    // of the layer size. Layer references carry the referenced layer's id.
+    private static object Effect(AepItem composition, AepLayer layer, AepProperty effect, bool bake) => new
+    {
+        effect.MatchName,
+        effect.Name,
+        Parameters = effect.Properties.Select(p => new
+        {
+            p.Name,
+            p.MatchName,
+            p.Value,
+            Layer = p.LayerReferenceId,
+            Animated = p.IsAnimated ? Animated(composition, layer, p, bake) : null,
+        }).ToList(),
+    };
 
     // Keyframe times are emitted in composition time. Baked values sample the
     // pre-expression value at each composition frame the layer is visible.
