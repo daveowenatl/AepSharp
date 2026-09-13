@@ -82,6 +82,9 @@ internal static class EngineDataSchema
     /// <summary>Tracking in thousandths of an em.</summary>
     public const string Tracking = "8";
 
+    /// <summary>Font caps: 0 normal, 1 small caps, 2 all caps, 3 all small caps (py-aep FontCapsOption).</summary>
+    public const string FontCaps = "12";
+
     /// <summary>Fill colour; the tuple lives at Entry/<see cref="ColorValue"/>.</summary>
     public const string FillColor = "53";
 

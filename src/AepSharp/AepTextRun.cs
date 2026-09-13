@@ -26,6 +26,12 @@ public sealed class AepTextRun
     public double? Tracking { get; internal set; }
 
     /// <summary>
+    /// Font caps option: 0 normal, 1 small caps, 2 all caps, 3 all small caps (After Effects'
+    /// fontCapsOption, stored as EngineData key 12). Null if absent (normal).
+    /// </summary>
+    public int? FontCaps { get; internal set; }
+
+    /// <summary>
     /// Line spacing in points. With auto leading on (the default) this is the font size ×
     /// the paragraph's auto-leading factor (120% by default); otherwise the explicit
     /// leading. Null if absent.

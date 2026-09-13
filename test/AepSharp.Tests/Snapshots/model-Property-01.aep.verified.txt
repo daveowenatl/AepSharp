@@ -567,6 +567,7 @@
                   0.0
                 ],
                 Tracking: 0.0,
+                FontCaps: 0,
                 Leading: 222.0
               }
             ],

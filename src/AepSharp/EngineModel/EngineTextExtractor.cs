@@ -52,6 +52,9 @@ internal sealed class EngineStyledRun
     /// <summary>Tracking in thousandths of an em, or null if absent.</summary>
     public double? Tracking { get; init; }
 
+    /// <summary>Font caps: 0 normal, 1 small caps, 2 all caps, 3 all small caps; null if absent.</summary>
+    public int? FontCaps { get; init; }
+
     /// <summary>
     /// Line spacing in points: the explicit leading, or font size × the first
     /// paragraph's auto-leading factor while auto leading is on. Null when absent.
@@ -185,6 +188,7 @@ internal static class EngineTextExtractor
                     FontIndex = style?.Get(EngineDataSchema.FontIndex) is EngineNumber fi ? (int)fi.Value : null,
                     FontSize = fontSize,
                     Tracking = (style?.Get(EngineDataSchema.Tracking) as EngineNumber)?.Value,
+                    FontCaps = style?.Get(EngineDataSchema.FontCaps) is EngineNumber caps ? (int)caps.Value : null,
                     Leading = style is null ? null : Leading(style, fontSize, paragraphStyle),
                     Fill = style is null ? null : Color(style, EngineDataSchema.FillColor),
                     Stroke = style is null ? null : Color(style, EngineDataSchema.StrokeColor),

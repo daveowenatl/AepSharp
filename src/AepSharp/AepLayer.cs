@@ -512,6 +512,7 @@ public class AepLayer
                 FillColor = run.Fill,
                 StrokeColor = run.Stroke,
                 Tracking = run.Tracking,
+                FontCaps = run.FontCaps,
                 Leading = run.Leading,
             });
         }

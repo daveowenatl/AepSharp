@@ -317,7 +317,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
                 BoxText = layer.IsBoxText,
                 BoxSize = layer.TextBoxSize,
                 BoxPosition = layer.TextBoxPosition,
-                Runs = layer.TextRuns.Select(r => new { r.Text, Font = r.FontName, Size = r.FontSize, Fill = r.FillColor, Stroke = r.StrokeColor, r.Tracking, r.Leading }).ToList(),
+                Runs = layer.TextRuns.Select(r => new { r.Text, Font = r.FontName, Size = r.FontSize, Fill = r.FillColor, Stroke = r.StrokeColor, r.Tracking, r.Leading, Caps = r.FontCaps is null or 0 ? null : r.FontCaps }).ToList(),
                 Animators = TextAnimators(layer) is { Count: > 0 } animators ? animators : null,
             },
         };
