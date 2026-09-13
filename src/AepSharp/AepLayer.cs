@@ -161,8 +161,24 @@ public class AepLayer
     /// <summary>Static anchor point [x, y, z] in layer pixels; null if animated or left at its default.</summary>
     public IReadOnlyList<double>? AnchorPoint => TransformValue("ADBE Anchor Point");
 
-    /// <summary>Static position [x, y, z] in composition pixels; null if animated or left at its default.</summary>
-    public IReadOnlyList<double>? Position => TransformValue("ADBE Position");
+    /// <summary>
+    /// Static position [x, y, z] in composition pixels; null if animated, left at its default,
+    /// or separated into X/Y/Z Position (see <see cref="PositionDimensionsSeparated"/>).
+    /// </summary>
+    public IReadOnlyList<double>? Position => PositionDimensionsSeparated ? null : TransformValue("ADBE Position");
+
+    /// <summary>True when Position is split into X Position, Y Position (and Z Position) properties.</summary>
+    public bool PositionDimensionsSeparated => FindTransformProperty("ADBE Position")?.DimensionsSeparated ?? false;
+
+    /// <summary>
+    /// Static X, Y and Z Position of a layer whose position dimensions are separated, in
+    /// composition pixels; each null if animated or left at its default (the composition
+    /// centre for X and Y, 0 for Z).
+    /// </summary>
+    public (double? X, double? Y, double? Z) SeparatedPosition => (
+        TransformValue("ADBE Position_0") is [var x, ..] ? x : null,
+        TransformValue("ADBE Position_1") is [var y, ..] ? y : null,
+        TransformValue("ADBE Position_2") is [var z, ..] ? z : null);
 
     /// <summary>
     /// Static scale as fractions [x, y, z] (100% = 1.0); null if animated or left at its default.
@@ -175,6 +191,27 @@ public class AepLayer
 
     /// <summary>Static opacity as a fraction (100% = 1.0); null if animated or left at its default.</summary>
     public double? Opacity => TransformValue("ADBE Opacity") is [var opacity, ..] ? opacity : null;
+
+    /// <summary>
+    /// A layer with a source (footage, solid or composition) stores its anchor point as a
+    /// fraction of the source's size; source-less layers (text, shape, null) store pixels.
+    /// Scales the stored value, keyframe values and spatial tangents to layer pixels, as
+    /// py-aep (MIT) resolves them. Ease speeds are already in pixels.
+    /// </summary>
+    internal void DenormalizeAnchorPoint(double width, double height)
+    {
+        if (FindTransformProperty("ADBE Anchor Point") is not { } anchor || width <= 0 || height <= 0)
+            return;
+        IReadOnlyList<double>? Scaled(IReadOnlyList<double>? v) =>
+            v?.Select((c, i) => i == 0 ? c * width : i == 1 ? c * height : c).ToArray();
+        anchor.Value = Scaled(anchor.Value);
+        foreach (var keyframe in anchor.Keyframes)
+        {
+            keyframe.Value = Scaled(keyframe.Value);
+            keyframe.InSpatialTangent = Scaled(keyframe.InSpatialTangent);
+            keyframe.OutSpatialTangent = Scaled(keyframe.OutSpatialTangent);
+        }
+    }
 
     /// <summary>Finds a property in the Transform group by match name.</summary>
     public AepProperty? FindTransformProperty(string matchName) =>

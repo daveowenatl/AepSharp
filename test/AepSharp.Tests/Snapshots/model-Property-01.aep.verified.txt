@@ -53,13 +53,15 @@
                     Dimensions: 1,
                     IsSpatial: false,
                     ExpressionEnabled: false,
-                    Enabled: true
+                    Enabled: true,
+                    DimensionsSeparated: false
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
                 ExpressionEnabled: false,
-                Enabled: true
+                Enabled: true,
+                DimensionsSeparated: false
               },
               {
                 MatchName: ADBE Slider Control,
@@ -81,13 +83,15 @@
                     Dimensions: 1,
                     IsSpatial: false,
                     ExpressionEnabled: false,
-                    Enabled: true
+                    Enabled: true,
+                    DimensionsSeparated: false
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
                 ExpressionEnabled: false,
-                Enabled: true
+                Enabled: true,
+                DimensionsSeparated: false
               },
               {
                 MatchName: ADBE Point Control,
@@ -110,13 +114,15 @@
                     Dimensions: 2,
                     IsSpatial: false,
                     ExpressionEnabled: false,
-                    Enabled: true
+                    Enabled: true,
+                    DimensionsSeparated: false
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
                 ExpressionEnabled: false,
-                Enabled: true
+                Enabled: true,
+                DimensionsSeparated: false
               },
               {
                 MatchName: ADBE Point3D Control,
@@ -134,13 +140,15 @@
                     IsAnimated: false,
                     IsSpatial: false,
                     ExpressionEnabled: false,
-                    Enabled: true
+                    Enabled: true,
+                    DimensionsSeparated: false
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
                 ExpressionEnabled: false,
-                Enabled: true
+                Enabled: true,
+                DimensionsSeparated: false
               },
               {
                 MatchName: ADBE Color Control,
@@ -165,13 +173,15 @@
                     Dimensions: 4,
                     IsSpatial: false,
                     ExpressionEnabled: false,
-                    Enabled: true
+                    Enabled: true,
+                    DimensionsSeparated: false
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
                 ExpressionEnabled: false,
-                Enabled: true
+                Enabled: true,
+                DimensionsSeparated: false
               },
               {
                 MatchName: ADBE Angle Control,
@@ -193,13 +203,15 @@
                     Dimensions: 1,
                     IsSpatial: false,
                     ExpressionEnabled: false,
-                    Enabled: true
+                    Enabled: true,
+                    DimensionsSeparated: false
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
                 ExpressionEnabled: false,
-                Enabled: true
+                Enabled: true,
+                DimensionsSeparated: false
               },
               {
                 MatchName: ADBE Layer Control,
@@ -218,13 +230,15 @@
                     IsSpatial: false,
                     ExpressionEnabled: false,
                     Enabled: true,
+                    DimensionsSeparated: false,
                     LayerReferenceId: 14
                   }
                 ],
                 IsAnimated: false,
                 IsSpatial: false,
                 ExpressionEnabled: false,
-                Enabled: true
+                Enabled: true,
+                DimensionsSeparated: false
               }
             ],
             OutPoint: 60.0,
@@ -253,7 +267,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -268,7 +283,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -279,7 +295,8 @@
                   IsAnimated: false,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -294,7 +311,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -309,7 +327,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -324,13 +343,20 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
               ExpressionEnabled: false,
-              Enabled: true
+              Enabled: true,
+              DimensionsSeparated: false
+            },
+            PositionDimensionsSeparated: false,
+            SeparatedPosition: {
+              Item1: 0.0,
+              Item2: 0.0
             },
             IsBoxText: false
           },
@@ -368,7 +394,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Text Path Options,
@@ -379,7 +406,8 @@
                   IsAnimated: false,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Text More Options,
@@ -390,13 +418,15 @@
                   IsAnimated: false,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
               ExpressionEnabled: false,
-              Enabled: true
+              Enabled: true,
+              DimensionsSeparated: false
             },
             OutPoint: 60.0,
             Stretch: 1.0,
@@ -424,7 +454,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Position_1,
@@ -439,7 +470,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Orientation,
@@ -450,7 +482,8 @@
                   IsAnimated: false,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Rotate X,
@@ -465,7 +498,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Rotate Y,
@@ -480,7 +514,8 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 },
                 {
                   MatchName: ADBE Envir Appear in Reflect,
@@ -495,13 +530,20 @@
                   Dimensions: 1,
                   IsSpatial: false,
                   ExpressionEnabled: false,
-                  Enabled: true
+                  Enabled: true,
+                  DimensionsSeparated: false
                 }
               ],
               IsAnimated: false,
               IsSpatial: false,
               ExpressionEnabled: false,
-              Enabled: true
+              Enabled: true,
+              DimensionsSeparated: false
+            },
+            PositionDimensionsSeparated: false,
+            SeparatedPosition: {
+              Item1: 0.0,
+              Item2: 0.0
             },
             SourceText: Text Layer,
             Fonts: [

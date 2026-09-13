@@ -73,6 +73,7 @@ public class AepProject
                         layer.Name = source.Name;
 
                     layer.ClampSourceDuration = AepLayer.SourceClampDuration(layer, source);
+                    layer.DenormalizeAnchorPoint(source.Width, source.Height);
                 }
             }
         }

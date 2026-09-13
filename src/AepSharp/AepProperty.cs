@@ -66,6 +66,13 @@ public class AepProperty
     public bool Enabled { get; internal set; } = true;
 
     /// <summary>
+    /// True when a separable property (a layer's Position) is split into X/Y/Z Position
+    /// followers ("ADBE Position_0/_1/_2"), which then hold the values. Bit 1 of byte 3 of
+    /// the tdsb block, per py-aep's TdsbChunk.
+    /// </summary>
+    public bool DimensionsSeparated { get; internal set; }
+
+    /// <summary>
     /// For a layer-select effect parameter (e.g. Layer Control): the <see cref="AepLayer.Id"/>
     /// of the referenced layer in the same composition, or null when none is chosen or the
     /// property is not a layer reference. Read from the value's <c>tdpi</c> block.
@@ -94,7 +101,11 @@ public class AepProperty
         };
 
         if (propHead.FindByType("tdsb")?.GetBytes() is { Length: >= 4 } flags)
+        {
             prop.Enabled = (flags[3] & 1) != 0;
+            // The bit is only meaningful on a separation leader; py-aep reads it for Position.
+            prop.DimensionsSeparated = matchName == "ADBE Position" && (flags[3] & 2) != 0;
+        }
 
         // Parse sub-properties from tdgp groups. Walk the (match name, list) pairs in
         // order rather than through a name-keyed map: an effect parade can hold several

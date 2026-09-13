@@ -300,7 +300,7 @@ internal sealed class SceneCommand : Command<SceneSettings>
             Transform = new
             {
                 Anchor = layer.AnchorPoint,
-                layer.Position,
+                Position = layer.PositionDimensionsSeparated ? SeparatedPosition(composition, layer) : layer.Position,
                 layer.Scale,
                 layer.Rotation,
                 layer.Opacity,
@@ -321,6 +321,16 @@ internal sealed class SceneCommand : Command<SceneSettings>
                 Animators = TextAnimators(layer) is { Count: > 0 } animators ? animators : null,
             },
         };
+    }
+
+    // A separated position's X/Y/Z as one [x, y, z], filling unstored dimensions with their
+    // defaults (the composition centre, z 0); null when none is stored.
+    private static double[]? SeparatedPosition(AepItem composition, AepLayer layer)
+    {
+        var (x, y, z) = layer.SeparatedPosition;
+        if (x is null && y is null && z is null)
+            return null;
+        return new[] { x ?? composition.Width / 2.0, y ?? composition.Height / 2.0, z ?? 0 };
     }
 
     // Effect parameter values are emitted as stored: sliders and angles as numbers,
