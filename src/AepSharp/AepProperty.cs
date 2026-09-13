@@ -14,6 +14,15 @@ public class AepProperty
     public List<AepProperty> Properties { get; internal set; } = new();
     public List<string> SelectOptions { get; internal set; } = new();
 
+    /// <summary>
+    /// The property's static value as raw components (e.g. [x, y, z] for Position,
+    /// one element for scalars like Opacity). Values are exposed exactly as the
+    /// file stores them: percent-typed properties are fractions (100% = 1.0).
+    /// Null for groups, for properties without a static value, and for animated
+    /// properties (keyframes are not yet decoded).
+    /// </summary>
+    public IReadOnlyList<double>? Value { get; internal set; }
+
     internal static AepProperty ParseFromList(RifxList propHead, string matchName)
     {
         var prop = new AepProperty
@@ -34,6 +43,13 @@ public class AepProperty
                 prop.Properties.Add(subProp);
             }
         }
+
+        // A tdbs list is a property's value container: tdb4 describes the value
+        // (component count at u16 offset 2), cdat holds the static value as
+        // big-endian doubles — the first <components> of them; the rest are
+        // reserved slots. Animated properties carry keyframes instead of cdat.
+        if (propHead.Identifier == "tdbs")
+            prop.Value = DecodeStaticValue(propHead);
 
         // Handle effect sub-properties (sspc identifier)
         if (propHead.Identifier == "sspc")
@@ -72,6 +88,26 @@ public class AepProperty
         }
 
         return prop;
+    }
+
+    private static IReadOnlyList<double>? DecodeStaticValue(RifxList tdbs)
+    {
+        var tdb4 = tdbs.FindByType("tdb4")?.GetBytes();
+        var cdat = tdbs.FindByType("cdat")?.GetBytes();
+        if (tdb4 is null || tdb4.Length < 4 || cdat is null)
+            return null;
+
+        var components = BinaryPrimitives.ReadUInt16BigEndian(tdb4.AsSpan(2));
+        // Clamp to the doubles actually present — a truncated cdat must not throw.
+        var available = cdat.Length / 8;
+        var count = Math.Min(components, available);
+        if (count == 0)
+            return null;
+
+        var value = new double[count];
+        for (var i = 0; i < count; i++)
+            value[i] = BinaryPrimitives.ReadDoubleBigEndian(cdat.AsSpan(i * 8));
+        return value;
     }
 
     internal static AepProperty ParseFromBlocks(List<object> entries, string matchName)
