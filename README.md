@@ -31,17 +31,12 @@ foreach (var comp in project.Items.Values.Where(i => i.ItemType == ItemType.Comp
 }
 ```
 
-## Building and releasing
+## Building
 
 ```bash
 dotnet build
 dotnet test
 ```
-
-To publish a release, set `<Version>` in `src/AepSharp/AepSharp.csproj` and push a tag with the
-same version (`git tag v0.2.0 && git push origin v0.2.0`). The `release` workflow runs the tests,
-packs, and pushes to nuget.org with Trusted Publishing. The nuget.org policy is tied to the file
-name `.github/workflows/release.yml`, so don't rename it.
 
 ## Credits
 
