@@ -3,8 +3,9 @@
 [![CI](https://github.com/daveowenatl/AepSharp/actions/workflows/ci.yml/badge.svg)](https://github.com/daveowenatl/AepSharp/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/AepSharp.svg)](https://www.nuget.org/packages/AepSharp/)
 
-Reads Adobe After Effects `.aep` files in C#: compositions, footage, folders, layers,
-and their effect and text properties. No After Effects install or ExtendScript needed.
+AepSharp reads Adobe After Effects `.aep` project files from C#. You get the item tree,
+compositions, footage, layers, transforms and keyframes, effects, shape contents and text,
+without After Effects installed and without ExtendScript.
 
 ## Install
 
@@ -12,168 +13,110 @@ and their effect and text properties. No After Effects install or ExtendScript n
 dotnet add package AepSharp
 ```
 
-Targets .NET 10.
+The package targets .NET 8, 9 and 10.
 
-## Usage
+## Quick start
 
 ```csharp
 using AepSharp;
 
-var project = AepProject.Open("template.aep");
+var project = AepProject.Open("template.aep");   // or AepProject.FromStream(stream)
 
-foreach (var item in project.Items.Values)
+foreach (var comp in project.Items.Values.Where(i => i.ItemType == ItemType.Composition))
 {
-    if (item.ItemType == ItemType.Composition)
-        Console.WriteLine($"{item.Name}  {item.Width}x{item.Height} @ {item.Framerate}fps  ({item.DurationSeconds}s)");
+    Console.WriteLine($"{comp.Name}  {comp.Width}x{comp.Height} @ {comp.Framerate}fps, {comp.DurationSeconds}s");
+
+    foreach (var layer in comp.CompositionLayers)
+        Console.WriteLine($"  {layer.Index} {layer.Name} ({layer.LayerType}) {layer.CompositionInPoint}s–{layer.CompositionOutPoint}s");
 }
 ```
 
-`AepProject.Open(path)` (or `AepProject.FromStream(stream)`) returns:
-
-- `ExpressionEngine`, e.g. `javascript-1.0`
-- `Depth`, the bit depth (`Bpc8`, `Bpc16`, `Bpc32`)
-- `RootFolder`, the project's item tree (`AepItem` with `FolderContents`)
-- `Items`, every item keyed by id (`Dictionary<uint, AepItem>`)
-
-An `AepItem` has `Name`, `Id`, `ItemType` (`Folder`, `Composition`, or `Footage`),
-and for comps and footage, `Width`, `Height`, `Framerate`, `DurationSeconds`,
-`FootageType`, `SourcePath` (the footage file) and `CompositionLayers`. An `AepLayer`
-carries its index, id, name, source id, parent id, quality, the layer flags (3D, solo,
-shy, locked, adjustment, and the rest), compositing (`BlendingMode`, `TrackMatte`,
-`TrackMatteLayerId`, `PreserveTransparency`), its timing (`StartTime`, `Stretch`,
-`CompositionInPoint`, `CompositionOutPoint`), its `Transform`, `Effects` and `Text`
-property trees, and the text copy, layout and styled runs.
-
-### Effects and text layout
-
-```csharp
-// Effect parameters carry their current value (or keyframes when animated)
-var resize = layer.Effects.First(e => e.Name == "Single Line Resize");
-var maxWidth = resize.Properties.First(p => p.Name == "Maximum width").Value[0];
-
-// Text layout
-if (layer.IsBoxText)
-    Console.WriteLine($"{layer.TextJustification} box {layer.TextBoxSize[0]}x{layer.TextBoxSize[1]} at {layer.TextBoxPosition[0]},{layer.TextBoxPosition[1]}");
-var run = layer.TextRuns[0];   // FontName, FontSize, FillColor, Tracking, Leading
-```
-
-Effect parameter values are exposed as the file stores them: sliders, angles (degrees)
-and integers as numbers, checkboxes 0/1, popups as a 1-based option index, colours as
-ARGB 0–255, and 2D points as fractions of the layer size. Layer references expose the
-referenced layer's `Id` as `LayerReferenceId`. Parameters left untouched keep the value
-recorded in the effect definition.
-
-`CompositionInPoint`/`CompositionOutPoint` apply time stretch (`StartTime + InPoint ×
-Stretch`) and, like After Effects, clamp layers of time-based footage and precomps to
-their source duration (unless time remapping is on). Time-reversed layers report the
-earlier time as the in point.
-
-### Transforms and keyframes
-
-```csharp
-var layer = comp.CompositionLayers[0];
-
-// Static values (null when left at the After Effects default or animated)
-var position = layer.Position;   // [x, y, z]
-var scale = layer.Scale;         // fractions: 100% = 1.0
-
-// Animated values, interpolated like After Effects (pre-expression)
-var opacity = layer.FindTransformProperty("ADBE Opacity");
-foreach (var key in opacity.Keyframes)
-    Console.WriteLine($"{key.Time + layer.StartTime}s  {key.Value[0]}  {key.OutInterpolation}");
-
-var positionAtTwoSeconds = layer.TransformValueAt("ADBE Position", 2.0); // composition time
-```
-
-`AepProperty` exposes `Keyframes` (time, value, in/out interpolation, per-dimension
-ease, spatial tangents, auto-Bezier and roving flags), `IsSpatial`, `Dimensions`,
-`Expression` / `ExpressionEnabled`, and `ValueAtTime(layerTime)`. Interpolation covers
-hold, linear and Bezier keyframes, temporal ease, spatial Bezier paths (by arc length)
-and auto-Bezier. Expressions are reported, not evaluated.
-
 ## What it reads
 
-Reads:
+- Project metadata (expression engine, bit depth) and the folder and item tree
+- Compositions: dimensions, frame rate, duration, background colour
+- Footage: dimensions, frame rate, duration, type (image, audio/video, vector, Photoshop, solid,
+  placeholder), source file path, solid colour
+- Layers: type, null, switches, quality, sampling and frame blend modes, source, parent, timing,
+  time stretch, blending mode, track matte and matte layer
+- Transforms, separated position included, with keyframes interpolated the way After Effects does it
+- Expression source and whether each expression is enabled, Source Text expressions included
+- Effects: names, parameter values or keyframes, and layer references. This includes repeat
+  instances of an effect that share the project's effect definition.
+- Shape layer contents as stored (groups, rectangles, ellipses, fills, strokes, transforms and so
+  on), with values and each group's enabled switch
+- Text: copy, fonts, styled runs (size, colours, tracking, leading, caps), paragraph
+  justification, and point or box text with the box size and position
 
-- Project metadata (expression engine, bit depth)
-- The folder and item tree
-- Compositions: dimensions, frame rate, duration, background color
-- Footage: dimensions, frame rate, duration, solid colour, type (image, audio/video, vector,
-  Photoshop, solid, placeholder), source file path
-- Layers: type (AV, text, shape, camera, light), null, flags, quality, sampling and frame-blend modes, source, parent,
-  the unclamped out point (`UnclampedCompositionOutPoint`, what After Effects would use if the source
-  became longer; derived from its clamp rule, not yet confirmed against a production render),
-  start/in/out times, time stretch, blending mode, track matte and matte layer
-- Transform values (anchor point, position, scale, rotation, opacity)
-- Keyframes for numeric properties, with After Effects-style interpolation
-- Expression source and whether it's enabled, including Source Text expressions
-- Effects: names and parameters with their current values or keyframes (including
-  repeat instances that share the project's effect definitions), layer references
-- Shape layer contents: the stored property tree (groups, rectangles, ellipses, fills,
-  strokes, transforms, …) with values and each group's enabled switch
-- Text: copy, fonts, styled runs (size, colours, tracking, leading), paragraph
-  justification, point vs. box text with box size and position
+It doesn't read these yet:
 
-Doesn't read (yet):
+- Masks beyond their count, markers, and the vertices of shape paths
+- Values of mask reference, 3D point and curve effect parameters
+- Time stretch when sampling keyframes, so `TransformValueAt` assumes 100%
+- Justification for any paragraph after the first
+- Linear keyframes on a curved spatial path. These follow a straight line, same as py-aep.
 
-- Masks (only their count), markers, shape path vertices (bezier paths)
-- Mask-reference, 3D-point and curve effect parameters (no value)
-- Separated dimensions (`Position_0`/`Position_1`) as a combined value
-- Time stretch when sampling keyframes (`TransformValueAt` assumes 100%)
-- Per-paragraph justification beyond the first paragraph
-- Linear keyframes on bent spatial paths follow a straight line (as py-aep does)
+`UnclampedCompositionOutPoint` also comes with a caveat: it follows the clamp rule, but I haven't
+compared it with a real render yet.
 
-To find where an unparsed field lives in the binary, use `aepdump`.
+## Accuracy
+
+The tests run against the `.aep` fixtures in this repo, saved from After Effects around 2022. I
+also check it against a private set of 181 production templates. On that set, keyframe decoding
+and interpolation agree with py-aep for every animated transform property, and keyframed
+positions line up with frames rendered by After Effects. Footage paths, layer timing and
+compositing, text layout and effect parameter values are compared with py-aep on the same
+templates.
+
+If a file comes out wrong, please [open an issue](https://github.com/daveowenatl/AepSharp/issues)
+and include the `aepdump` output.
 
 ## aepdump
 
-CLI for inspecting files:
+`aepdump` is a command-line tool for poking at files. It lives in this repo and isn't part of the
+NuGet package.
 
 ```bash
 dotnet run --project src/AepSharp.Tools -- tree template.aep          # comps, layers, text copy
-dotnet run --project src/AepSharp.Tools -- scene template.aep         # JSON: timing, compositing, transforms, keyframes, effects, text
+dotnet run --project src/AepSharp.Tools -- scene template.aep         # JSON scene description
 dotnet run --project src/AepSharp.Tools -- scene template.aep --bake  # plus per-frame animated values
 dotnet run --project src/AepSharp.Tools -- rifx template.aep --format json
 ```
 
-`rifx` prints each chunk with its absolute offset, FourCC, declared vs. actual size, a
-hex/ascii preview, and a flag if it looks truncated or overflowing. `scene` is meant as
-input for renderers and template tooling: footage with `sourcePath`; layers with
-`type` (text, shape, camera, …), `null`, `threeD`, `adjustment`, `collapseTransform`,
-`timeRemap`, `masks` and `textAnimators` counts, shape `contents` (only non-default properties are stored; values in stored units, colours ARGB 0–255, shape percentages as 0–100), `blendingMode`, `trackMatte`, `stretch`, `motionBlur`, every enabled or disabled
-expression (`property` as a match-name path, `expression`, `enabled`), each effect's `parameters` (`name`, `value`,
-and keyframes/baked frames when animated); text with `justification`, `boxText`,
-`boxSize` and `boxPosition`.
+`tree` prints the item tree, with each composition's layers and their text.
 
-## Tested against
+`scene` writes JSON for renderers and template tooling to consume. It has footage source paths,
+and for each layer its type, switches, timing, compositing, transforms and keyframes, effect
+parameters, shape contents and text layout. Every expression is listed by its match-name path.
 
-A set of real `.aep` fixtures (After Effects around 2022), plus a corpus of 181
-production templates. Keyframe decoding and interpolation match py-aep on every
-animated transform property in that corpus, and keyframed positions match frames
-rendered by After Effects. Footage paths, layer blending/matte/stretch/timing, text
-justification and box geometry, and effect parameter values are differentially tested
-against py-aep over the same corpus. If a file reads wrong, open an issue with the `aepdump`
-output.
+`rifx` lists the raw binary chunks: offset, FourCC, declared and actual size, and a hex preview.
+It flags chunks that look truncated or overflow their parent. When a field isn't parsed yet, this
+is how you find where it lives in the file.
+
+## Building and releasing
+
+```bash
+dotnet build
+dotnet test
+```
+
+To publish a release, set `<Version>` in `src/AepSharp/AepSharp.csproj` and push a tag with the
+same version (`git tag v0.2.0 && git push origin v0.2.0`). The `release` workflow runs the tests,
+packs, and pushes to nuget.org with Trusted Publishing. The nuget.org policy is tied to the file
+name `.github/workflows/release.yml`, so don't rename it.
 
 ## Credits
 
-Port of [boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser)
-(MIT). The format reverse-engineering is theirs; their README has the research notes
-and a Kaitai definition.
+AepSharp started as a port of [boltframe/aftereffects-aep-parser](https://github.com/boltframe/aftereffects-aep-parser)
+(MIT). Boltframe did the original reverse engineering of the format, and their README has the
+research notes and a Kaitai definition.
 
-Keyframe, layer (`ldta`), effect parameter (`pard`), footage alias and text layout
-record layouts, and keyframe interpolation, follow [py-aep](https://github.com/forticheprod/py-aep)
-(MIT), whose interpolation is ported from [lottie-web](https://github.com/airbnb/lottie-web) (MIT).
+The record layouts for keyframes, layers (`ldta`), effect parameters (`pard`), footage aliases and
+text layout come from [py-aep](https://github.com/forticheprod/py-aep) (MIT), and so does keyframe
+interpolation. py-aep ported its interpolation from [lottie-web](https://github.com/airbnb/lottie-web) (MIT).
 
 ## License
 
-[MIT](LICENSE). © 2026 Dave Owen, © 2020 Boltframe. Ported MIT-licensed work from py-aep
-(© 2023 Fortiche production) and lottie-web (© 2015 Bodymovin) is listed in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
-
-## Package
-
-`dotnet add package AepSharp` (net8.0, net9.0, net10.0). Releases are published by pushing a
-`v<version>` tag that matches `<Version>` in `src/AepSharp/AepSharp.csproj`; the `release` workflow
-tests, packs and pushes to nuget.org using Trusted Publishing (no API key secret; the nuget.org
-policy is bound to `.github/workflows/release.yml`).
+[MIT](https://github.com/daveowenatl/AepSharp/blob/main/LICENSE). © 2026 Dave Owen, © 2020
+Boltframe. Code ported from py-aep (© 2023 Fortiche production) and lottie-web (© 2015 Bodymovin)
+is listed in [THIRD-PARTY-NOTICES.md](https://github.com/daveowenatl/AepSharp/blob/main/THIRD-PARTY-NOTICES.md).
