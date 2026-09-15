@@ -5,6 +5,13 @@ on:
   push:
     tags: [ 'v*' ]
 
+# id-token: write lets NuGet/login exchange the GitHub OIDC token for a short-lived
+# nuget.org API key (Trusted Publishing). The nuget.org policy is bound to this file
+# name, so renaming it breaks publishing.
+permissions:
+  contents: read
+  id-token: write
+
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -35,5 +42,11 @@ jobs:
       - name: Pack
         run: dotnet pack src/AepSharp/AepSharp.csproj --configuration Release --output artifacts
 
+      - name: NuGet login (Trusted Publishing)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: daveowen66
+
       - name: Push to nuget.org
-        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate

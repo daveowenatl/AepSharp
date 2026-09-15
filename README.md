@@ -174,5 +174,6 @@ record layouts, and keyframe interpolation, follow [py-aep](https://github.com/f
 ## Package
 
 `dotnet add package AepSharp` (net8.0, net9.0, net10.0). Releases are published by pushing a
-`v<version>` tag that matches `<Version>` in `src/AepSharp/AepSharp.csproj`; the `publish` workflow
-tests, packs and pushes to nuget.org (needs the `NUGET_API_KEY` repository secret).
+`v<version>` tag that matches `<Version>` in `src/AepSharp/AepSharp.csproj`; the `release` workflow
+tests, packs and pushes to nuget.org using Trusted Publishing (no API key secret; the nuget.org
+policy is bound to `.github/workflows/release.yml`).
