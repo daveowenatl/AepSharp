@@ -60,4 +60,32 @@ public sealed class AepKeyframe
 
     /// <summary>Timeline label colour index.</summary>
     public int Label { get; internal set; }
+
+    private const uint SyntheticTimeBase = 1_000_000;
+
+    /// <summary>
+    /// A keyframe built by a caller rather than read from a file, for <see cref="Keyframes.Evaluate"/>:
+    /// <paramref name="time"/> in seconds (microsecond resolution), the value as After Effects stores
+    /// it (percent properties as fractions), and one ease per dimension applied on both sides when
+    /// given (the After Effects default ease, speed 0 and influence 16.67 %, otherwise).
+    /// </summary>
+    public static AepKeyframe Create(
+        double time,
+        IReadOnlyList<double> value,
+        KeyframeInterpolation interpolation = KeyframeInterpolation.Bezier,
+        AepKeyframeEase? inEase = null,
+        AepKeyframeEase? outEase = null)
+    {
+        var defaultEase = new AepKeyframeEase(0, 100.0 / 6);
+        return new AepKeyframe
+        {
+            TimeUnits = checked((int)Math.Round(time * SyntheticTimeBase)),
+            TimeBase = SyntheticTimeBase,
+            InInterpolation = interpolation,
+            OutInterpolation = interpolation,
+            Value = value.ToArray(),
+            InEase = Enumerable.Repeat(inEase ?? defaultEase, value.Count).ToArray(),
+            OutEase = Enumerable.Repeat(outEase ?? defaultEase, value.Count).ToArray(),
+        };
+    }
 }
