@@ -20,6 +20,9 @@ public class AepLayer
     public bool NullLayer { get; internal set; }
     /// <summary>Number of masks on the layer.</summary>
     public int MaskCount { get; internal set; }
+
+    /// <summary>The layer's masks in parade order, with their shapes, feather, opacity and expansion; empty when it has none.</summary>
+    public IReadOnlyList<AepMask> Masks { get; internal set; } = Array.Empty<AepMask>();
     /// <summary>Number of text animators on a text layer.</summary>
     public int TextAnimatorCount { get; internal set; }
     public bool ThreeDEnabled { get; internal set; }
@@ -332,7 +335,10 @@ public class AepLayer
         // Each mask is an "ADBE Mask Atom" whose entries start with an mkif block before its
         // property list, so count the atoms by match name rather than as parsed groups.
         if (rootTDGP.TryGetValue("ADBE Mask Parade", out var masksTDGP))
+        {
             layer.MaskCount = AepProperty.PairMatchNames(masksTDGP).matchNames.Count(n => n == "ADBE Mask Atom");
+            layer.Masks = AepMask.ParseParade(masksTDGP);
+        }
 
         if (rootTDGP.TryGetValue("ADBE Time Remapping", out var timeRemapTDBS))
             layer.TimeRemapEnabled = AepProperty.ParseFromList(timeRemapTDBS, "ADBE Time Remapping").IsAnimated;

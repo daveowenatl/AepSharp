@@ -32,6 +32,14 @@ public class AepItem
     public byte[] BackgroundColor { get; internal set; } = new byte[3];
     public List<AepLayer> CompositionLayers { get; internal set; } = new();
 
+    /// <summary>
+    /// The properties a composition publishes to its Essential Graphics panel, in panel order;
+    /// empty for compositions that publish none and for other item kinds. Read from the newest
+    /// of the item's <c>CIF3</c>, <c>CIF2</c> and <c>CIFO</c> lists (After Effects writes all
+    /// three; the newest carries controls older panel formats can't express).
+    /// </summary>
+    public IReadOnlyList<AepEssentialProperty> EssentialProperties { get; internal set; } = Array.Empty<AepEssentialProperty>();
+
     internal static AepItem Parse(RifxList itemHead, AepProject project, bool isRoot = false)
     {
         var item = new AepItem();
@@ -155,6 +163,10 @@ public class AepItem
                     item.BackgroundColor = new[] { cdta[52], cdta[53], cdta[54] };
                     item.Width = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(140));
                     item.Height = BinaryPrimitives.ReadUInt16BigEndian(cdta.AsSpan(142));
+
+                    var essential = itemHead.SublistFind("CIF3") ?? itemHead.SublistFind("CIF2") ?? itemHead.SublistFind("CIFO");
+                    if (essential is not null)
+                        item.EssentialProperties = AepEssentialProperty.ParseAll(essential);
 
                     // Parse layers
                     var layerIndex = 0;

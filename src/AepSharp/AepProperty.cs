@@ -80,6 +80,13 @@ public class AepProperty
     public uint? LayerReferenceId { get; internal set; }
 
     /// <summary>
+    /// For a path property (a mask's <c>ADBE Mask Shape</c>, a shape group's <c>ADBE Vector Shape</c>):
+    /// the static path, or null when the property holds none (an expression may build it; see
+    /// <see cref="Expression"/>) or the property is not a path.
+    /// </summary>
+    public AepPath? Path { get; internal set; }
+
+    /// <summary>
     /// The property's pre-expression value at <paramref name="layerTime"/> seconds of
     /// layer time, interpolated from its keyframes (hold, linear, Bezier with temporal
     /// ease, spatial paths, auto-Bezier). Returns the static <see cref="Value"/> when
@@ -138,6 +145,20 @@ public class AepProperty
         // expression) alongside the btdk EngineData.
         if (propHead.Identifier == "btds" && propHead.SublistFind("tdbs") is { } documentTdbs)
             DecodeValueMetadata(prop, documentTdbs);
+
+        // A path (mask shape, shape layer Path): an om-s list wraps the property's tdbs
+        // (metadata, keyframe count and any expression) beside an omks list holding the
+        // static vertices as a shap.
+        if (propHead.Identifier == "om-s")
+        {
+            if (propHead.SublistFind("tdbs") is { } pathTdbs)
+            {
+                DecodeValueMetadata(prop, pathTdbs);
+                prop.KeyframeCount = DecodeKeyframeCount(pathTdbs);
+            }
+            if (propHead.SublistFind("omks")?.SublistFind("shap") is { } shap)
+                prop.Path = AepPath.Decode(shap);
+        }
 
         // Handle effect sub-properties (sspc identifier)
         if (propHead.Identifier == "sspc")
