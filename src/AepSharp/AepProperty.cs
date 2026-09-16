@@ -129,6 +129,16 @@ public class AepProperty
             prop.Properties.Add(subProp);
         }
 
+        // A property group (a shape group, Trim Paths, a mask atom) carries the name the user gave it in a
+        // tdsn block; "-_0_/-" marks a group left at its default name. Expressions address shape contents
+        // by this name (content("Line")), so it is exposed as the Label, as an effect's is.
+        if (propHead.Identifier == "tdgp" && propHead.FindByType("tdsn") is { } groupName)
+        {
+            var label = groupName.ToAsciiString();
+            if (label.Length > 0 && label != "-_0_/-")
+                prop.Label = label;
+        }
+
         // A tdbs list is a property's value container: tdb4 describes the value
         // (component count at u16 offset 2), cdat holds the static value as
         // big-endian doubles — the first <components> of them; the rest are
