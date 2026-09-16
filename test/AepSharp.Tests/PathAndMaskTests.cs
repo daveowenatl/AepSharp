@@ -113,7 +113,35 @@ public class PathAndMaskTests
         Assert.Null(property.Path);
     }
 
+    [Theory]
+    [InlineData("Draw On", "Draw On")]
+    [InlineData("-_0_/-", "")]
+    [InlineData("", "")]
+    public void AGroupsUserNameIsItsLabel(string stored, string label)
+    {
+        var group = new RifxList { Identifier = "tdgp" };
+        group.Blocks.Add(Utf8("tdsn", stored));
+        var property = AepProperty.ParseFromList(group, "ADBE Vector Filter - Trim");
+
+        Assert.Equal(label, property.Label);
+        Assert.Equal("ADBE Vector Filter - Trim", property.Name);
+    }
+
     // ---- the recap template ---------------------------------------------------
+
+    [SkippableFact]
+    public void SeriesLineGroupAndTrimCarryTheirNames()
+    {
+        var project = OpenRecap();
+        Skip.If(project is null, "AEPSHARP_ESSENTIAL_AEP not set");
+        var line = project!.Items.Values.Single(i => i.Name == "Animated Line Chart").CompositionLayers.Single(l => l.Name == "Series 1 Line");
+
+        // The markers' expressions read thisLayer.content('Line').content('Draw On').end.
+        var group = line.Contents!.Properties.First(p => p.MatchName == "ADBE Vector Group");
+        Assert.Equal("Line", group.Label);
+        var trim = Descendants(group).Single(p => p.MatchName == "ADBE Vector Filter - Trim");
+        Assert.Equal("Draw On", trim.Label);
+    }
 
     [SkippableFact]
     public void SeriesLinePathIsExpressionDrivenWithNoStaticVertices()
