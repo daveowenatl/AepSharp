@@ -36,7 +36,7 @@ public class LayerCompositingTests
         WriteTime(ldta, 20, d.In);
         WriteTime(ldta, 28, d.Out);
         ldta[38] = d.Flags1;
-        if (d.Length >= 164)
+        if (d.Length >= 160)
         {
             ldta[99] = d.Blend;
             ldta[103] = d.Transfer;
@@ -44,8 +44,9 @@ public class LayerCompositingTests
             BinaryPrimitives.WriteUInt32BigEndian(ldta.AsSpan(108), d.StretchDivisor);
             ldta[131] = d.Type;
             BinaryPrimitives.WriteUInt32BigEndian(ldta.AsSpan(132), d.Parent);
-            BinaryPrimitives.WriteUInt32BigEndian(ldta.AsSpan(160), d.MatteLayer ?? 0);
         }
+        if (d.Length >= 164)
+            BinaryPrimitives.WriteUInt32BigEndian(ldta.AsSpan(160), d.MatteLayer ?? 0);
 
         var layer = new RifxList { Identifier = "Layr" };
         layer.Blocks.Add(new RifxBlock { Type = "ldta", Size = (uint)ldta.Length, Data = ldta });
@@ -103,6 +104,76 @@ public class LayerCompositingTests
         Assert.Equal(14345u, layer.Id);
         Assert.Equal(14300u, layer.ParentLayerId);
         Assert.Equal(14346u, layer.TrackMatteLayerId);
+    }
+
+    private static List<AepLayer> Composition(params Ldta[] layers)
+    {
+        var parsed = layers.Select(Parse).ToList();
+        AepLayer.ResolveTrackMattes(parsed);
+        return parsed;
+    }
+
+    [Fact]
+    public void ResolvesAnExplicitMatteLayerAnywhereInTheStack()
+    {
+        // After Effects 2023+: the matte (id 96) sits below the layer it mattes.
+        var layers = Composition(
+            new Ldta(Id: 214, Matte: 1, MatteLayer: 96),
+            new Ldta(Id: 96));
+
+        Assert.True(layers[0].HasTrackMatte);
+        Assert.Equal(96u, layers[0].TrackMatteLayerId);
+        Assert.False(layers[0].IsTrackMatte);
+        Assert.True(layers[1].IsTrackMatte);
+        Assert.False(layers[1].HasTrackMatte);
+    }
+
+    [Fact]
+    public void StoredTypeWithoutAMatteLayerIsNotMatted()
+    {
+        // Production (CDJR_15Second_Incentives, "Orange Solid 2"): After Effects 2023+ keeps
+        // the type when a matte is removed, so Alpha with matte id 0 means no matte — not
+        // the pre-2023 "layer above", which here would be the layer it is the matte of.
+        var layers = Composition(
+            new Ldta(Id: 214, Matte: 1, MatteLayer: 96),
+            new Ldta(Id: 96, Matte: 1));
+
+        Assert.Equal(TrackMatteType.Alpha, layers[1].TrackMatte);
+        Assert.False(layers[1].HasTrackMatte);
+        Assert.Null(layers[1].TrackMatteLayerId);
+        Assert.True(layers[1].IsTrackMatte);
+        Assert.False(layers[0].IsTrackMatte);
+    }
+
+    [Fact]
+    public void PreTwentyTwentyThreeMatteIsTheLayerAbove()
+    {
+        var layers = Composition(
+            new Ldta(Id: 5, Matte: 1, Length: 160),
+            new Ldta(Id: 6, Matte: 3, Length: 160),
+            new Ldta(Id: 7, Length: 160));
+
+        Assert.False(layers[0].HasTrackMatte);   // a type on the top layer has no layer above
+        Assert.Null(layers[0].TrackMatteLayerId);
+        Assert.True(layers[1].HasTrackMatte);
+        Assert.Equal(5u, layers[1].TrackMatteLayerId);
+        Assert.Equal(TrackMatteType.Luma, layers[1].TrackMatte);
+        Assert.True(layers[0].IsTrackMatte);
+        Assert.False(layers[1].IsTrackMatte);
+        Assert.False(layers[2].IsTrackMatte);
+    }
+
+    [Fact]
+    public void OneMatteCanServeSeveralLayers()
+    {
+        var layers = Composition(
+            new Ldta(Id: 1, Matte: 1, MatteLayer: 3),
+            new Ldta(Id: 2, Matte: 2, MatteLayer: 3),
+            new Ldta(Id: 3));
+
+        Assert.True(layers[2].IsTrackMatte);
+        Assert.Equal(TrackMatteType.AlphaInverted, layers[1].TrackMatte);
+        Assert.Equal(3u, layers[1].TrackMatteLayerId);
     }
 
     [Theory]

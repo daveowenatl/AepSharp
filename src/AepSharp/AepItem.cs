@@ -177,6 +177,7 @@ public class AepItem
                         layer.Index = (uint)layerIndex;
                         item.CompositionLayers.Add(layer);
                     }
+                    AepLayer.ResolveTrackMattes(item.CompositionLayers);
                     break;
                 }
         }

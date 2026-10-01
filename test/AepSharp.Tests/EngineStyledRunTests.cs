@@ -105,4 +105,18 @@ public class EngineStyledRunTests
         var run = Assert.Single(doc!.StyledRuns);
         Assert.Equal("Hi", run.Text);
     }
+
+    [Fact]
+    public void KeepsParagraphBreaksThatEndEarlierRuns()
+    {
+        // Production (CDJR_Comps OfferValueSuffix1): an empty first paragraph in a larger
+        // size, then the copy. The first span is just the "\r" that ends the empty line.
+        var white = new double[] { 1, 1, 1, 1 };
+        var doc = EngineTextExtractor.Extract(Document(
+            "\rtotal cash allowance\r",
+            Span(1, 0, 42.94473, white, white),
+            Span(21, 0, 13.45311, white, white)));
+
+        Assert.Equal(new[] { "\r", "total cash allowance" }, doc!.StyledRuns.Select(r => r.Text));
+    }
 }

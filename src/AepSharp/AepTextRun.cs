@@ -7,7 +7,11 @@ namespace AepSharp;
 /// </summary>
 public sealed class AepTextRun
 {
-    /// <summary>The run's text.</summary>
+    /// <summary>
+    /// The run's text. Paragraph breaks are "\r" and stay with the run they end, so a run
+    /// can be just "\r" (an empty paragraph whose line height follows this run's size).
+    /// The document's final terminator is not included.
+    /// </summary>
     public string Text { get; internal set; } = "";
 
     /// <summary>PostScript font name (resolved from the document font set), or null.</summary>
