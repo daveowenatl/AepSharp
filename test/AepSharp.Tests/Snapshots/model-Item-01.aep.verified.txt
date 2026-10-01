@@ -42,6 +42,8 @@
                 UnclampedCompositionOutPoint: 31.0,
                 TimeRemapEnabled: false,
                 Id: 79,
+                HasTrackMatte: false,
+                IsTrackMatte: false,
                 PreserveTransparency: false,
                 Transform: {
                   MatchName: ADBE Transform Group,
@@ -179,6 +181,8 @@
                 UnclampedCompositionOutPoint: 31.0,
                 TimeRemapEnabled: false,
                 Id: 76,
+                HasTrackMatte: false,
+                IsTrackMatte: false,
                 PreserveTransparency: false,
                 Transform: {
                   MatchName: ADBE Transform Group,

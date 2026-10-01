@@ -293,8 +293,9 @@ internal sealed class SceneCommand : Command<SceneSettings>
             layer.StartTime,
             Stretch = layer.Stretch == 1.0 ? (double?)null : layer.Stretch,
             BlendingMode = layer.BlendingMode.ToString(),
-            TrackMatte = layer.TrackMatte == TrackMatteType.None ? null : layer.TrackMatte.ToString(),
-            TrackMatteLayerId = layer.TrackMatteLayerId,
+            TrackMatte = layer.HasTrackMatte ? layer.TrackMatte.ToString() : null,
+            TrackMatteLayerId = layer.HasTrackMatte ? layer.TrackMatteLayerId : null,
+            IsTrackMatte = layer.IsTrackMatte ? true : (bool?)null,
             ParentLayerId = layer.ParentLayerId,
             layer.Id,
             Transform = new

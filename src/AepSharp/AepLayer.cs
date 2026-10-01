@@ -137,15 +137,38 @@ public class AepLayer
     /// <summary>Blending mode. <see cref="BlendingMode.Normal"/> for layers without one (cameras, lights).</summary>
     public BlendingMode BlendingMode { get; internal set; }
 
-    /// <summary>How this layer uses a track matte; <see cref="TrackMatteType.None"/> when it has none.</summary>
+    /// <summary>
+    /// The track matte type as stored (<c>AVLayer.trackMatteType</c>). After Effects 2023+
+    /// keeps the type when a layer's matte is removed, so a type other than
+    /// <see cref="TrackMatteType.None"/> does not by itself mean the layer is matted: check
+    /// <see cref="HasTrackMatte"/>.
+    /// </summary>
     public TrackMatteType TrackMatte { get; internal set; }
 
     /// <summary>
-    /// Id of the layer used as this layer's track matte (After Effects 2023+, ldta u32 at
-    /// offset 160). Null when the layer has no matte layer or the file predates explicit
-    /// matte layers — there the matte is the layer directly above.
+    /// Id of the layer used as this layer's track matte, or null when it has none. In
+    /// After Effects 2023+ files this is the stored matte layer (ldta u32 at offset 160);
+    /// in older files, where the matte is always the layer directly above, it is that
+    /// layer's id. Resolved once the whole composition is parsed.
     /// </summary>
     public uint? TrackMatteLayerId { get; internal set; }
+
+    /// <summary>
+    /// True when this layer is matted: it has a matte type and a matte layer
+    /// (<c>AVLayer.hasTrackMatte</c>, with After Effects 2023+ semantics).
+    /// </summary>
+    public bool HasTrackMatte => TrackMatte != TrackMatteType.None && TrackMatteLayerId is not null;
+
+    /// <summary>
+    /// True when another layer in the composition uses this layer as its track matte
+    /// (<c>AVLayer.isTrackMatte</c>). After Effects turns a matte layer's video switch off
+    /// when it is chosen, but a matte whose switch is on again also renders as itself, so
+    /// visibility still follows <see cref="VideoEnabled"/>.
+    /// </summary>
+    public bool IsTrackMatte { get; internal set; }
+
+    // True when the ldta carries the After Effects 2023+ matte layer id field.
+    internal bool StoresMatteLayerId { get; set; }
 
     /// <summary>True when "Preserve Underlying Transparency" is on.</summary>
     public bool PreserveTransparency { get; internal set; }
@@ -398,8 +421,30 @@ public class AepLayer
         if (ldta.Length >= 164)
         {
             var matte = BinaryPrimitives.ReadUInt32BigEndian(ldta.AsSpan(160));
+            layer.StoresMatteLayerId = true;
             layer.TrackMatteLayerId = matte == 0 ? null : matte;
         }
+    }
+
+    /// <summary>
+    /// Resolves track mattes across a composition's layers (in stacking order, top first),
+    /// per <c>AVLayer.trackMatteLayer</c> / <c>isTrackMatte</c>. After Effects 2023+ stores
+    /// the matte layer id; a zero id there means no matte even when a type is stored
+    /// (<c>removeTrackMatte()</c> keeps the type). Older files have no id field and the
+    /// matte of a layer with a type is the layer directly above.
+    /// </summary>
+    internal static void ResolveTrackMattes(IReadOnlyList<AepLayer> layers)
+    {
+        for (var i = 0; i < layers.Count; i++)
+        {
+            var layer = layers[i];
+            if (!layer.StoresMatteLayerId && layer.TrackMatte != TrackMatteType.None && i > 0)
+                layer.TrackMatteLayerId = layers[i - 1].Id;
+        }
+
+        var mattes = layers.Where(l => l.HasTrackMatte).Select(l => l.TrackMatteLayerId!.Value).ToHashSet();
+        foreach (var layer in layers)
+            layer.IsTrackMatte = mattes.Contains(layer.Id);
     }
 
     // The stored value is the After Effects SDK PF_Xfer transfer mode; mapping per

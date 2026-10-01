@@ -37,6 +37,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 53,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -302,6 +304,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 37,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -440,6 +444,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 35,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -578,6 +584,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 34,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -716,6 +724,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 32,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -854,6 +864,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 30,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -992,6 +1004,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 29,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -1103,6 +1117,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 28,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -1241,6 +1257,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 27,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -1380,6 +1398,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 26,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -1518,6 +1538,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 25,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -1655,6 +1677,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 22,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -1793,6 +1817,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 21,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -1931,6 +1957,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 20,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -2069,6 +2097,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 18,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -2208,6 +2238,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 17,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,
@@ -2346,6 +2378,8 @@
             UnclampedCompositionOutPoint: 60.0,
             TimeRemapEnabled: false,
             Id: 24,
+            HasTrackMatte: false,
+            IsTrackMatte: false,
             PreserveTransparency: false,
             Transform: {
               MatchName: ADBE Transform Group,

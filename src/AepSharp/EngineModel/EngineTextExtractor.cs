@@ -34,7 +34,7 @@ internal sealed class EngineTextDocument
 }
 
 /// <summary>One styled span of text within a document (a StyleRun entry).</summary>
-internal sealed class EngineStyledRun
+internal sealed record EngineStyledRun
 {
     public string Text { get; init; } = "";
 
@@ -184,7 +184,7 @@ internal static class EngineTextExtractor
                 var fontSize = (style?.Get(EngineDataSchema.FontSize) as EngineNumber)?.Value;
                 result.Add(new EngineStyledRun
                 {
-                    Text = slice.TrimEnd('\r', '\n'),
+                    Text = slice,
                     FontIndex = style?.Get(EngineDataSchema.FontIndex) is EngineNumber fi ? (int)fi.Value : null,
                     FontSize = fontSize,
                     Tracking = (style?.Get(EngineDataSchema.Tracking) as EngineNumber)?.Value,
@@ -195,6 +195,12 @@ internal static class EngineTextExtractor
                 });
             }
         }
+
+        // Every document ends with a paragraph terminator "\r" that is not part of the copy;
+        // drop it from the last run only. A "\r" ending any other run is a real paragraph
+        // break (a span can hold just "\r", e.g. an empty first line in a larger size).
+        if (result.Count > 0 && result[^1].Text.EndsWith('\r'))
+            result[^1] = result[^1] with { Text = result[^1].Text[..^1] };
         return result;
     }
 
